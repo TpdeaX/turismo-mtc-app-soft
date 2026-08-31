@@ -1,4 +1,4 @@
-# 🚞 Plataforma de Zonas Turísticas - MTC
+# Plataforma de Zonas Turísticas - MTC
 
 ![Status](https://img.shields.io/badge/Status-En%20Desarrollo-yellow)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen)
@@ -8,12 +8,12 @@ Plataforma Software Web orientada a fomentar el uso del transporte público y el
 
 El sistema funciona como un asesor especializado que proporciona a los usuarios rutas turísticas diseñadas para realizarse exclusivamente a pie desde diversas estaciones ferroviarias, integrando información en tiempo real.
 
-## 🌟 Características Principales
+## Características Principales
 
 *   **Integración de Datos:**
-    *   🚂 **PeruRail:** Estaciones, horarios, tiempos de recorrido y precios.
-    *   ⛅ **SENAMHI:** Pronóstico climático por zona geográfica.
-    *   🗺️ **Travel Group Perú:** Gestión y consulta de zonas turísticas.
+    *   **PeruRail:** Estaciones, horarios, tiempos de recorrido y precios.
+    *   **SENAMHI:** Pronóstico climático por zona geográfica.
+    *   **Travel Group Perú:** Gestión y consulta de zonas turísticas.
 *   **Módulo de Usuario Final:**
     *   Ingreso de preferencias turísticas (ej. naturaleza, historia, aventura).
     *   Visualización de rutas recomendadas, dificultad, clima y precios.
@@ -22,7 +22,7 @@ El sistema funciona como un asesor especializado que proporciona a los usuarios 
 *   **Módulo Administrativo:**
     *   Gestión (CRUD) de Zonas Turísticas, Estaciones, y Horarios.
 
-## 🏗️ Arquitectura (Por Definir)
+## Arquitectura (Por Definir)
 
 > **Nota:** La arquitectura final (Monolito, Microservicios, etc.) y el framework del Frontend (JSP, Angular, React) están pendientes de definición por el equipo de arquitectura. La base actual utiliza Spring Boot.
 
@@ -38,13 +38,13 @@ src/main/java/com/zonasturisticas/plataforma/
  └── dto/            # Data Transfer Objects
 ```
 
-## 🚀 Requisitos Previos
+## Requisitos Previos
 
 *   Java 21
 *   Maven 3.8+
 *   MySQL 8.0+
 
-## ⚙️ Configuración del Entorno
+## Configuración del Entorno
 
 1. Clonar el repositorio.
 2. Configurar las variables de entorno en el archivo `application.properties` para la conexión a la base de datos MySQL.
@@ -53,7 +53,7 @@ src/main/java/com/zonasturisticas/plataforma/
    mvn spring-boot:run
    ```
 
-## 🎨 UI / Estilos
+## UI / Estilos
 
 Este repositorio base ya incluye los estilos estandarizados aprobados para el proyecto. Los recursos estáticos (CSS, JS, imágenes base) se encuentran listos para ser integrados en las vistas finales.
 
