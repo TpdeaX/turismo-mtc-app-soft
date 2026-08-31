@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Maven
+target/
+.mvn/
+*.log
+uploads/evidencias/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
