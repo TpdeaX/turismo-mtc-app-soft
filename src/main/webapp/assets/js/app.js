@@ -331,32 +331,34 @@
     }
 
     var FOTOS_PERU = {
-        'plaza de armas': 'https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80',
-        'qorikancha': 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
-        'san blas': 'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80',
-        'poroy': 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80',
-        'ollantaytambo': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
-        'pueblo inca': 'https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80',
-        'pinkuylluna': 'https://images.unsplash.com/photo-1528164344705-475426879c0d?auto=format&fit=crop&w=800&q=80',
-        'mandor': 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
-        'aguas calientes': 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-        'termales': 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-        'museo': 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
-        'valle sagrado': 'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80',
-        'uros': 'https://images.unsplash.com/photo-1533050487297-09b450131914?auto=format&fit=crop&w=800&q=80',
-        'kuntur wasi': 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80',
-        'juliaca': 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
-        'monasterio': 'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?auto=format&fit=crop&w=800&q=80',
-        'arequipa': 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=800&q=80',
-        'catedral': 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=800&q=80',
-        'yanahuara': 'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80'
+        'plaza de armas': '/assets/img/zonas/plaza-armas-cusco.webp',
+        'qorikancha': '/assets/img/zonas/qorikancha.webp',
+        'san blas': '/assets/img/zonas/san-blas.webp',
+        'poroy': '/assets/img/zonas/mirador-poroy.webp',
+        'ruinas': '/assets/img/zonas/ollantaytambo-ruinas.webp',
+        'ollantaytambo': '/assets/img/zonas/ollantaytambo-ruinas.webp',
+        'pueblo inca': '/assets/img/zonas/ollantaytambo-pueblo.webp',
+        'pinkuylluna': '/assets/img/zonas/pinkuylluna.webp',
+        'mandor': '/assets/img/zonas/mandor.webp',
+        'aguas calientes': '/assets/img/zonas/banos-termales.webp',
+        'termales': '/assets/img/zonas/banos-termales.webp',
+        'museo': '/assets/img/zonas/museo-machu-picchu.webp',
+        'valle sagrado': '/assets/img/zonas/mirador-valle-sagrado.webp',
+        'uros': '/assets/img/zonas/uros-puno.webp',
+        'kuntur wasi': '/assets/img/zonas/kuntur-wasi.webp',
+        'juliaca': '/assets/img/zonas/catedral-juliaca.webp',
+        'santa catalina': '/assets/img/zonas/catedral-juliaca.webp',
+        'monasterio': '/assets/img/zonas/monasterio-santa-catalina.webp',
+        'arequipa': '/assets/img/zonas/catedral-arequipa.webp',
+        'catedral': '/assets/img/zonas/catedral-arequipa.webp',
+        'yanahuara': '/assets/img/zonas/yanahuara.webp'
     };
     var FOTOS_GENERALES = [
-        'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=800&q=80'
+        '/assets/img/zonas/plaza-armas-cusco.webp',
+        '/assets/img/zonas/qorikancha.webp',
+        '/assets/img/zonas/ollantaytambo-ruinas.webp',
+        '/assets/img/zonas/catedral-arequipa.webp',
+        '/assets/img/zonas/mandor.webp'
     ];
 
     function obtenerFotoDestino(nombre, semilla) {
@@ -374,10 +376,12 @@
         if (img.dataset.fallbackAplicado === '2') { return; }
         var nombre = img.getAttribute('alt') || '';
         var semilla = parseInt(img.dataset.seed || '0', 10) || nombre.length;
+        var ctx = document.documentElement.getAttribute('data-context-path') || '';
 
         if (!img.dataset.fallbackAplicado) {
             img.dataset.fallbackAplicado = '1';
-            img.src = obtenerFotoDestino(nombre, semilla);
+            var foto = obtenerFotoDestino(nombre, semilla);
+            img.src = (foto && !foto.startsWith('http') && !foto.startsWith(ctx)) ? (ctx + foto) : foto;
         } else {
             img.dataset.fallbackAplicado = '2';
             img.src = tileZona(nombre, semilla);

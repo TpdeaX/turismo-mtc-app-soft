@@ -278,7 +278,7 @@
                             <a href="${ctx}/zona/${r.zona.codigo}" class="zona-media">
                                 <img data-fallback data-seed="${r.zona.codigo}" alt="${r.zona.nombre}"
                                      loading="lazy"
-                                     <c:if test="${not empty r.zona.imagen}">src="${r.zona.imagen}"</c:if>>
+                                     <c:if test="${not empty r.zona.imagen}">src="${mtc:foto(r.zona.imagen, ctx)}"</c:if>>
                                 <c:if test="${not empty r.tarifaDesde}">
                                     <span class="price-tag">Desde S/ ${mtc:solesCorto(r.tarifaDesde)}</span>
                                 </c:if>

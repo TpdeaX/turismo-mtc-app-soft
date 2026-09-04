@@ -20,7 +20,7 @@
     <div style="position:absolute;inset:0;overflow:hidden">
         <img data-fallback data-seed="${zona.codigo}" alt="${zona.nombre}"
              style="width:100%;height:100%;object-fit:cover;opacity:.42"
-             <c:if test="${not empty zona.imagen}">src="${zona.imagen}"</c:if>>
+             <c:if test="${not empty zona.imagen}">src="${mtc:foto(zona.imagen, ctx)}"</c:if>>
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,20,40,.72) 0%,rgba(6,20,40,.5) 40%,rgba(6,20,40,.95) 100%)"></div>
     </div>
 
@@ -396,7 +396,7 @@
                                    style="padding:8px;border-radius:var(--r-md)">
                                     <img data-fallback data-seed="${r.codigo}" alt="${r.nombre}"
                                          style="width:64px;height:52px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0"
-                                         <c:if test="${not empty r.imagen}">src="${r.imagen}"</c:if>>
+                                         <c:if test="${not empty r.imagen}">src="${mtc:foto(r.imagen, ctx)}"</c:if>>
                                     <div style="min-width:0">
                                         <div style="font-weight:650;font-size:.92rem">${r.nombre}</div>
                                         <div class="soft" style="font-size:.8rem">

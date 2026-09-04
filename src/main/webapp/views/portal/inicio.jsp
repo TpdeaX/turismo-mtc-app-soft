@@ -250,7 +250,7 @@
                     <div class="zona-media">
                         <img data-fallback data-seed="${z.codigo}" alt="${z.nombre}"
                              loading="lazy"
-                             <c:if test="${not empty z.imagen}">src="${z.imagen}"</c:if>>
+                             <c:if test="${not empty z.imagen}">src="${mtc:foto(z.imagen, ctx)}"</c:if>>
                         <c:if test="${z.costoReferencial gt 0}">
                             <span class="price-tag">Desde S/ ${mtc:solesCorto(z.costoReferencial)}</span>
                         </c:if>

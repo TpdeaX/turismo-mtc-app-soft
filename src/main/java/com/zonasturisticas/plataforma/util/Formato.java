@@ -107,4 +107,24 @@ public final class Formato {
         }
         return texto.length() <= largo ? texto : texto.substring(0, largo).trim() + "…";
     }
+
+    /**
+     * Resuelve la URL de una imagen soportando URLs absolutas (http/https)
+     * y rutas locales relativas (/assets/... o assets/...).
+     */
+    public static String foto(String imagen, String contextPath) {
+        if (imagen == null || imagen.isBlank()) {
+            return "";
+        }
+        String img = imagen.trim();
+        if (img.startsWith("http://") || img.startsWith("https://")) {
+            return img;
+        }
+        String ctx = contextPath == null ? "" : contextPath.trim();
+        if (img.startsWith("/")) {
+            return ctx + img;
+        }
+        return ctx + "/" + img;
+    }
 }
+

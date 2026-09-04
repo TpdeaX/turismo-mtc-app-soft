@@ -19,6 +19,7 @@
 <script>
     (function () {
         try {
+            document.documentElement.setAttribute('data-context-path', '${pageContext.request.contextPath}');
             var t = localStorage.getItem('mtc-tema');
             if (!t) {
                 t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

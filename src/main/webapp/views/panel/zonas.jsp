@@ -128,7 +128,7 @@
                                             <div class="row center g-3">
                                                 <img data-fallback data-seed="${z.codigo}" alt="${z.nombre}"
                                                      style="width:52px;height:40px;object-fit:cover;border-radius:var(--r-xs);flex-shrink:0"
-                                                     <c:if test="${not empty z.imagen}">src="${z.imagen}"</c:if>>
+                                                     <c:if test="${not empty z.imagen}">src="${mtc:foto(z.imagen, ctx)}"</c:if>>
                                                 <div style="min-width:0">
                                                     <div class="cell-strong">${z.nombre}</div>
                                                     <div class="soft" style="font-size:.79rem">

@@ -403,12 +403,6 @@ h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; letter-spacing: -.02em; line-h
     transition: transform var(--t-slow) var(--e-out);
 }
 .card-hover:hover .zona-media img { transform: scale(1.06); }
-.zona-media::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(6, 20, 40, .55), transparent 55%);
-    pointer-events: none;
-}
 .zona-media .price-tag {
     position: absolute; top: 14px; right: 14px; z-index: 2;
     background: var(--brand-gold-500); color: #33290A;
@@ -2216,14 +2210,6 @@ button:focus-visible,
 
 /* --- Encabezado de página del panel --- */
 .page-head h1 { letter-spacing: -.03em; }
-
-/* --- Imagen de zona: degradado inferior para asentar la etiqueta de precio --- */
-.zona-media::after {
-    content: '';
-    position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
-    background: linear-gradient(to top, rgba(6, 16, 32, .42), transparent);
-    pointer-events: none;
-}
 
 /* --------------------------------------------------------------------------
    19. RESPONSIVE (mobile first)

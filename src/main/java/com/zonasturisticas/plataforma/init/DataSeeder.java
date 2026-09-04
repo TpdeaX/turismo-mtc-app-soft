@@ -169,18 +169,18 @@ public class DataSeeder implements ApplicationRunner {
                 "Corazón de la ciudad imperial, rodeada por la Catedral y el Templo de la Compañía de Jesús. "
                         + "Punto de partida natural para recorrer a pie el centro histórico.",
                 "Centro histórico", "45.00", true,
-                "https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Plaza de Armas del Cusco"),
                 "Historia", "Arquitectura", "Cultura");
         zona(centroCusco, "Templo del Qorikancha",
                 "Antiguo templo del Sol inca sobre el que se levantó el Convento de Santo Domingo. "
                         + "Muestra el ensamblaje de piedra más fino de la arquitectura inca.",
                 "Av. El Sol", "40.00", true,
-                "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Templo del Qorikancha"),
                 "Historia", "Arquitectura");
         zona(centroCusco, "Barrio de San Blas",
                 "Barrio de artesanos con calles empedradas, talleres de imaginería y miradores hacia la ciudad.",
                 "San Blas", "0.00", true,
-                "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Barrio de San Blas"),
                 "Cultura", "Gastronomía");
 
         // --- Cusco: Estación Poroy ---------------------------------------
@@ -189,7 +189,7 @@ public class DataSeeder implements ApplicationRunner {
                 "Ascenso corto sobre la meseta de Poroy con vista panorámica del valle del Cusco "
                         + "y de la cordillera del Vilcanota.",
                 "Poroy alto", "0.00", true,
-                "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Mirador de Poroy"),
                 "Naturaleza", "Aventura");
 
         // --- Cusco: Estación Ollantaytambo -------------------------------
@@ -199,12 +199,12 @@ public class DataSeeder implements ApplicationRunner {
                 "Fortaleza, templo y andenería inca que domina el Valle Sagrado. Uno de los pocos lugares "
                         + "donde los incas resistieron con éxito el avance español.",
                 "Ollantaytambo", "70.00", true,
-                "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Conjunto Arqueológico de Ollantaytambo"),
                 "Historia", "Arquitectura");
         zona(ollanta, "Pueblo Inca Viviente",
                 "Traza urbana inca aún habitada, con canchas, canales de agua originales y calles empedradas.",
                 "Casco urbano", "0.00", true,
-                "https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Pueblo Inca Viviente"),
                 "Cultura", "Historia");
 
         Ruta pinkuylluna = ruta("Estación Ollantaytambo", "Sendero Pinkuylluna", "2.00", "Alta");
@@ -212,7 +212,7 @@ public class DataSeeder implements ApplicationRunner {
                 "Ascenso exigente hacia los antiguos colcas incas talladas en la ladera. "
                         + "Ofrece la mejor vista aérea del pueblo y de la fortaleza.",
                 "Cerro Pinkuylluna", "0.00", true,
-                "https://images.unsplash.com/photo-1528164344705-475426879c0d?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Graneros de Pinkuylluna"),
                 "Aventura", "Historia", "Naturaleza");
 
         // --- Machu Picchu Pueblo -----------------------------------------
@@ -221,21 +221,21 @@ public class DataSeeder implements ApplicationRunner {
                 "Caminata siguiendo la vía férrea y el río Vilcanota hasta un jardín botánico "
                         + "de ceja de selva con una catarata de 20 metros.",
                 "Km 114 vía férrea", "10.00", true,
-                "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Cataratas de Mandor"),
                 "Naturaleza", "Aventura");
 
         Ruta termales = ruta("Estación Machu Picchu Pueblo", "Circuito Aguas Termales", "1.00", "Fácil");
         zona(termales, "Baños Termales de Aguas Calientes",
                 "Pozas de aguas termales que dan nombre al pueblo, ideales para recuperarse tras el recorrido.",
                 "Av. Pachacútec", "20.00", true,
-                "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Baños Termales de Aguas Calientes"),
                 "Naturaleza", "Cultura");
 
         Ruta museo = ruta("Estación Machu Picchu Pueblo", "Sendero al Museo de Sitio", "2.50", "Moderada");
         zona(museo, "Museo de Sitio Manuel Chávez Ballón",
                 "Colección de piezas halladas en el santuario histórico y jardín botánico de orquídeas nativas.",
                 "Puente Ruinas", "22.00", true,
-                "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Museo de Sitio Manuel Chávez Ballón"),
                 "Historia", "Cultura", "Naturaleza");
 
         // --- Urubamba ------------------------------------------------------
@@ -244,7 +244,7 @@ public class DataSeeder implements ApplicationRunner {
                 "Recorrido entre chacras y andenes hasta un balcón natural sobre el río Urubamba "
                         + "y el nevado Chicón.",
                 "Urubamba alto", "0.00", true,
-                "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Mirador del Valle Sagrado"),
                 "Naturaleza", "Aventura");
 
         // --- Puno ----------------------------------------------------------
@@ -253,7 +253,7 @@ public class DataSeeder implements ApplicationRunner {
                 "Punto de partida hacia las islas flotantes de totora del pueblo Uros, "
                         + "accesible a pie desde la estación por el malecón.",
                 "Puerto lacustre", "15.00", true,
-                "https://images.unsplash.com/photo-1533050487297-09b450131914?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Embarcadero de los Uros"),
                 "Cultura", "Naturaleza");
 
         Ruta kunturWasi = ruta("Estación Puno", "Ascenso al Mirador Kuntur Wasi", "2.40", "Alta");
@@ -261,7 +261,7 @@ public class DataSeeder implements ApplicationRunner {
                 "Más de 600 escalones hasta el cóndor de piedra que corona la ciudad, "
                         + "con vista completa del lago Titicaca.",
                 "Cerro Huajsapata", "5.00", true,
-                "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Mirador Kuntur Wasi"),
                 "Aventura", "Naturaleza");
 
         // --- Juliaca --------------------------------------------------------
@@ -269,7 +269,7 @@ public class DataSeeder implements ApplicationRunner {
         zona(juliaca, "Catedral de Santa Catalina",
                 "Templo de piedra en el corazón comercial del altiplano, junto al mercado tradicional.",
                 "Plaza Bolognesi", "0.00", true,
-                "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Catedral de Santa Catalina"),
                 "Arquitectura", "Cultura");
 
         // --- Arequipa --------------------------------------------------------
@@ -278,67 +278,74 @@ public class DataSeeder implements ApplicationRunner {
                 "Ciudadela religiosa del siglo XVI construida en sillar, con calles, plazas "
                         + "y claustros de color añil y almagre.",
                 "Calle Santa Catalina", "45.00", true,
-                "https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Monasterio de Santa Catalina"),
                 "Historia", "Arquitectura", "Cultura");
         zona(sillar, "Basílica Catedral de Arequipa",
                 "Fachada de sillar blanco que ocupa todo un lado de la Plaza de Armas, "
                         + "reconstruida tras los sismos del siglo XIX.",
                 "Plaza de Armas", "15.00", true,
-                "https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Basílica Catedral de Arequipa"),
                 "Arquitectura", "Historia");
 
         Ruta yanahuara = ruta("Estación Arequipa", "Sendero Mirador de Yanahuara", "2.60", "Moderada");
         zona(yanahuara, "Mirador de Yanahuara",
                 "Arcos de sillar con vista directa al volcán Misti, rodeados de picanterías tradicionales.",
                 "Yanahuara", "0.00", true,
-                "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80",
+                resolverImagenZona("Mirador de Yanahuara"),
                 "Naturaleza", "Gastronomía", "Arquitectura");
     }
 
     private void actualizarImagenesZonas() {
         for (ZonaTuristica z : zonaRepository.findAll()) {
-            if (z.getImagen() == null || z.getImagen().isBlank() || z.getImagen().contains("wikimedia.org")) {
-                String n = z.getNombre().toLowerCase();
-                String url = "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80";
-                if (n.contains("plaza de armas")) {
-                    url = "https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("qorikancha")) {
-                    url = "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("san blas")) {
-                    url = "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("poroy")) {
-                    url = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("ollantaytambo")) {
-                    url = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("pueblo inca")) {
-                    url = "https://images.unsplash.com/photo-1589556264800-08ae9e129a8c?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("pinkuylluna")) {
-                    url = "https://images.unsplash.com/photo-1528164344705-475426879c0d?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("mandor")) {
-                    url = "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("aguas calientes") || n.contains("termales")) {
-                    url = "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("museo")) {
-                    url = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("valle sagrado")) {
-                    url = "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("uros")) {
-                    url = "https://images.unsplash.com/photo-1533050487297-09b450131914?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("kuntur wasi")) {
-                    url = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("juliaca") || n.contains("catedral de santa catalina")) {
-                    url = "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("monasterio")) {
-                    url = "https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("arequipa") || n.contains("basílica")) {
-                    url = "https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=800&q=80";
-                } else if (n.contains("yanahuara")) {
-                    url = "https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=800&q=80";
-                }
-                z.setImagen(url);
+            String correcta = resolverImagenZona(z.getNombre());
+            if (z.getImagen() == null || !z.getImagen().equals(correcta)) {
+                z.setImagen(correcta);
                 zonaRepository.save(z);
             }
         }
+    }
+
+    public static String resolverImagenZona(String nombre) {
+        if (nombre == null) {
+            return "/assets/img/zonas/plaza-armas-cusco.webp";
+        }
+        String n = nombre.toLowerCase();
+        if (n.contains("plaza de armas") && !n.contains("arequipa")) {
+            return "/assets/img/zonas/plaza-armas-cusco.webp";
+        } else if (n.contains("qorikancha")) {
+            return "/assets/img/zonas/qorikancha.webp";
+        } else if (n.contains("san blas")) {
+            return "/assets/img/zonas/san-blas.webp";
+        } else if (n.contains("poroy")) {
+            return "/assets/img/zonas/mirador-poroy.webp";
+        } else if (n.contains("ruinas") || n.contains("conjunto arqueológico") || n.contains("conjunto arqueologico")) {
+            return "/assets/img/zonas/ollantaytambo-ruinas.webp";
+        } else if (n.contains("pueblo inca") || n.contains("viviente")) {
+            return "/assets/img/zonas/ollantaytambo-pueblo.webp";
+        } else if (n.contains("pinkuylluna")) {
+            return "/assets/img/zonas/pinkuylluna.webp";
+        } else if (n.contains("mandor")) {
+            return "/assets/img/zonas/mandor.webp";
+        } else if (n.contains("aguas calientes") || n.contains("termales")) {
+            return "/assets/img/zonas/banos-termales.webp";
+        } else if (n.contains("museo") || n.contains("chávez") || n.contains("chavez")) {
+            return "/assets/img/zonas/museo-machu-picchu.webp";
+        } else if (n.contains("valle sagrado")) {
+            return "/assets/img/zonas/mirador-valle-sagrado.webp";
+        } else if (n.contains("uros")) {
+            return "/assets/img/zonas/uros-puno.webp";
+        } else if (n.contains("kuntur wasi")) {
+            return "/assets/img/zonas/kuntur-wasi.webp";
+        } else if (n.contains("juliaca") || (n.contains("santa catalina") && !n.contains("monasterio"))) {
+            return "/assets/img/zonas/catedral-juliaca.webp";
+        } else if (n.contains("monasterio")) {
+            return "/assets/img/zonas/monasterio-santa-catalina.webp";
+        } else if (n.contains("arequipa") || n.contains("basílica") || n.contains("basilica")) {
+            return "/assets/img/zonas/catedral-arequipa.webp";
+        } else if (n.contains("yanahuara")) {
+            return "/assets/img/zonas/yanahuara.webp";
+        }
+        return "/assets/img/zonas/plaza-armas-cusco.webp";
     }
 
     /* --------------------------- utilidades -------------------------- */

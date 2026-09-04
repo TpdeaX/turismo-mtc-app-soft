@@ -69,4 +69,11 @@
         <function-signature>java.lang.String recorte(java.lang.String, int)</function-signature>
     </function>
 
+    <function>
+        <name>foto</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String foto(java.lang.String, java.lang.String)</function-signature>
+    </function>
+
 </taglib>
+
