@@ -1445,6 +1445,140 @@
             });
         }, { passive: true });
 
+        /* --- Tooltip flotante para categorias adicionales (+N) --- */
+        (function initFloatingTooltips() {
+            var tooltipEl = null;
+            var activeTrigger = null;
+            var hideTimeout = null;
+
+            function getOrCreateTooltip() {
+                if (!tooltipEl) {
+                    tooltipEl = document.createElement('div');
+                    tooltipEl.className = 'floating-tooltip';
+                    tooltipEl.setAttribute('role', 'tooltip');
+                    document.body.appendChild(tooltipEl);
+
+                    tooltipEl.addEventListener('mouseenter', function () {
+                        clearTimeout(hideTimeout);
+                    });
+                    tooltipEl.addEventListener('mouseleave', function () {
+                        scheduleHide();
+                    });
+                }
+                return tooltipEl;
+            }
+
+            function showTooltip(trigger) {
+                clearTimeout(hideTimeout);
+                var targetId = trigger.getAttribute('data-tooltip-html');
+                if (!targetId) return;
+                var tpl = document.getElementById(targetId);
+                if (!tpl) return;
+
+                var tip = getOrCreateTooltip();
+                tip.innerHTML = tpl.innerHTML;
+
+                activeTrigger = trigger;
+                trigger.classList.add('active');
+
+                tip.className = 'floating-tooltip visible';
+                var rect = trigger.getBoundingClientRect();
+                var tipRect = tip.getBoundingClientRect();
+
+                var spaceAbove = rect.top;
+                var spaceBelow = window.innerHeight - rect.bottom;
+                var placeAbove = spaceAbove >= (tipRect.height + 12) || spaceAbove > spaceBelow;
+
+                var topPos, arrowClass;
+                if (placeAbove) {
+                    topPos = rect.top - tipRect.height - 8 + window.scrollY;
+                    arrowClass = 'arrow-bottom';
+                } else {
+                    topPos = rect.bottom + 8 + window.scrollY;
+                    arrowClass = 'arrow-top';
+                }
+
+                var leftPos = rect.left + (rect.width / 2) - (tipRect.width / 2) + window.scrollX;
+                var minLeft = 12 + window.scrollX;
+                var maxLeft = document.documentElement.clientWidth - tipRect.width - 12 + window.scrollX;
+                var clampedLeft = Math.max(minLeft, Math.min(maxLeft, leftPos));
+
+                var arrowX = (rect.left + rect.width / 2 + window.scrollX) - clampedLeft;
+                arrowX = Math.max(12, Math.min(tipRect.width - 12, arrowX));
+
+                tip.className = 'floating-tooltip visible ' + arrowClass;
+                tip.style.top = Math.round(topPos) + 'px';
+                tip.style.left = Math.round(clampedLeft) + 'px';
+                tip.style.setProperty('--arrow-x', Math.round(arrowX) + 'px');
+            }
+
+            function scheduleHide() {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(hideTooltip, 120);
+            }
+
+            function hideTooltip() {
+                if (tooltipEl) {
+                    tooltipEl.classList.remove('visible');
+                }
+                if (activeTrigger) {
+                    activeTrigger.classList.remove('active');
+                    activeTrigger = null;
+                }
+            }
+
+            document.addEventListener('mouseenter', function (ev) {
+                var tr = ev.target.closest('[data-tooltip-html]');
+                if (tr) {
+                    showTooltip(tr);
+                }
+            }, true);
+
+            document.addEventListener('mouseleave', function (ev) {
+                var tr = ev.target.closest('[data-tooltip-html]');
+                if (tr) {
+                    scheduleHide();
+                }
+            }, true);
+
+            document.addEventListener('focusin', function (ev) {
+                var tr = ev.target.closest('[data-tooltip-html]');
+                if (tr) {
+                    showTooltip(tr);
+                }
+            });
+
+            document.addEventListener('focusout', function (ev) {
+                var tr = ev.target.closest('[data-tooltip-html]');
+                if (tr) {
+                    scheduleHide();
+                }
+            });
+
+            document.addEventListener('click', function (ev) {
+                var tr = ev.target.closest('[data-tooltip-html]');
+                if (tr) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    if (activeTrigger === tr && tooltipEl && tooltipEl.classList.contains('visible')) {
+                        hideTooltip();
+                    } else {
+                        showTooltip(tr);
+                    }
+                    return;
+                }
+                if (tooltipEl && !tooltipEl.contains(ev.target)) {
+                    hideTooltip();
+                }
+            });
+
+            window.addEventListener('scroll', function () {
+                if (tooltipEl && tooltipEl.classList.contains('visible')) {
+                    hideTooltip();
+                }
+            }, { passive: true });
+        })();
+
         /* --- Inicializar comboboxes con estilo mejorado --- */
         document.querySelectorAll('select.select').forEach(initCustomSelect);
 

@@ -293,11 +293,36 @@
                             <div class="zona-body">
                                 <div class="row between center g-2 wrap-flex">
                                     <a href="${ctx}/zona/${r.zona.codigo}" class="zona-title">${r.zona.nombre}</a>
-                                    <c:forEach var="cat" items="${r.zona.categorias}" end="0">
-                                        <span class="chip chip-categoria" style="--cat:${cat.color}">
-                                            <span class="mi mi-sm">${cat.icono}</span>${cat.nombre}
-                                        </span>
-                                    </c:forEach>
+                                    <div class="row g-1 center">
+                                        <c:forEach var="cat" items="${r.zona.categorias}" end="0">
+                                            <span class="chip chip-categoria" style="--cat:${cat.color}">
+                                                <span class="mi mi-sm">${cat.icono}</span>${cat.nombre}
+                                            </span>
+                                        </c:forEach>
+                                        <c:if test="${r.zona.categorias.size() gt 1}">
+                                            <span class="chip chip-outline chip-more"
+                                                  data-tooltip-html="tooltip-explorar-${r.zona.codigo}"
+                                                  title="<c:forEach var="cat" items="${r.zona.categorias}" begin="1" varStatus="cs">${cat.nombre}${cs.last ? '' : ', '}</c:forEach>"
+                                                  tabindex="0"
+                                                  role="button"
+                                                  aria-label="Ver más categorías">
+                                                +${r.zona.categorias.size() - 1}
+                                            </span>
+                                            <div id="tooltip-explorar-${r.zona.codigo}" style="display:none">
+                                                <div class="tooltip-header">
+                                                    <span class="mi mi-sm">category</span>
+                                                    Otras categorías (${r.zona.categorias.size() - 1})
+                                                </div>
+                                                <div class="tooltip-chips">
+                                                    <c:forEach var="cat" items="${r.zona.categorias}" begin="1">
+                                                        <span class="chip chip-categoria" style="--cat:${cat.color}">
+                                                            <span class="mi mi-sm">${cat.icono}</span>${cat.nombre}
+                                                        </span>
+                                                    </c:forEach>
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                    </div>
                                 </div>
 
                                 <p class="zona-desc">${r.zona.descripcion}</p>

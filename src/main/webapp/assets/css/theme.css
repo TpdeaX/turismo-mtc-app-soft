@@ -487,6 +487,94 @@ h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; letter-spacing: -.02em; line-h
 .chip-outline { background: transparent; border-color: var(--c-border-strong); color: var(--c-text-muted); }
 .chip-lg { padding: 8px 16px; font-size: .84rem; }
 
+/* Chip interactivo '+N' */
+.chip-more {
+    cursor: pointer;
+    font-weight: 700;
+    padding: 3px 8px;
+    font-size: .74rem;
+    border-color: var(--c-border-strong);
+    color: var(--c-text-muted);
+    transition: all var(--t-fast) ease;
+    user-select: none;
+    position: relative;
+}
+.chip-more:hover,
+.chip-more:focus-visible,
+.chip-more.active {
+    background: var(--c-primary);
+    color: var(--c-on-primary, #fff);
+    border-color: var(--c-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--sh-1);
+}
+
+/* Tooltip flotante global (adjunto al body para evitar recortes de overflow en tablas) */
+.floating-tooltip {
+    position: absolute;
+    z-index: 99999;
+    background: var(--c-surface);
+    color: var(--c-text);
+    border: 1.5px solid var(--c-border-strong);
+    border-radius: var(--r-md);
+    box-shadow: 0 14px 36px -4px rgba(6, 20, 40, .28), 0 6px 16px -2px rgba(6, 20, 40, .14);
+    padding: 10px 14px;
+    font-size: .82rem;
+    pointer-events: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px) scale(.96);
+    transition: opacity .16s var(--e-out), transform .16s var(--e-out), visibility .16s;
+    max-width: 320px;
+    min-width: 140px;
+}
+.floating-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+.floating-tooltip .tooltip-header {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-weight: 700;
+    color: var(--c-text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.floating-tooltip .tooltip-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.floating-tooltip .tooltip-chips .chip-categoria {
+    font-size: .78rem;
+    padding: 4px 10px;
+}
+.floating-tooltip::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--c-surface);
+    border: 1.5px solid var(--c-border-strong);
+    transform: rotate(45deg);
+}
+.floating-tooltip.arrow-bottom::before {
+    bottom: -6px;
+    left: calc(var(--arrow-x, 50%) - 5px);
+    border-top: none;
+    border-left: none;
+}
+.floating-tooltip.arrow-top::before {
+    top: -6px;
+    left: calc(var(--arrow-x, 50%) - 5px);
+    border-bottom: none;
+    border-right: none;
+}
+
 .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .dot-live { box-shadow: 0 0 0 0 currentColor; animation: pulse-dot 2s infinite; }
 @keyframes pulse-dot {

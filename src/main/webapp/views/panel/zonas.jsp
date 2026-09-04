@@ -149,9 +149,27 @@
                                                     </span>
                                                 </c:forEach>
                                                 <c:if test="${z.categorias.size() gt 2}">
-                                                    <span class="chip chip-outline">
+                                                    <span class="chip chip-outline chip-more"
+                                                          data-tooltip-html="tooltip-cats-${z.codigo}"
+                                                          title="<c:forEach var="cat" items="${z.categorias}" begin="2" varStatus="cs">${cat.nombre}${cs.last ? '' : ', '}</c:forEach>"
+                                                          tabindex="0"
+                                                          role="button"
+                                                          aria-label="Ver más categorías">
                                                         +${z.categorias.size() - 2}
                                                     </span>
+                                                    <div id="tooltip-cats-${z.codigo}" style="display:none">
+                                                        <div class="tooltip-header">
+                                                            <span class="mi mi-sm">category</span>
+                                                            Otras categorías (${z.categorias.size() - 2})
+                                                        </div>
+                                                        <div class="tooltip-chips">
+                                                            <c:forEach var="cat" items="${z.categorias}" begin="2">
+                                                                <span class="chip chip-categoria" style="--cat:${cat.color}">
+                                                                    <span class="mi mi-sm">${cat.icono}</span>${cat.nombre}
+                                                                </span>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </div>
                                                 </c:if>
                                             </div>
                                         </td>
