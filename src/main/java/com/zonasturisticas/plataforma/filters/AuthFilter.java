@@ -1,14 +1,6 @@
 package com.zonasturisticas.plataforma.filters;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-
-import com.zonasturisticas.plataforma.beans.Empleado;
-import com.zonasturisticas.plataforma.beans.Permiso;
-
+import com.zonasturisticas.plataforma.beans.Usuario;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,10 +9,26 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
+/**
+ * RNF06: proteccion del panel administrativo mediante autenticacion de usuario.
+ *
+ * El portal del turista es de acceso libre (precondicion del CU-01: basta con
+ * ingresar a la plataforma). Todo lo que cuelga de /panel exige sesion y,
+ * ademas, el rol correspondiente segun la RN02:
+ *   - /panel/zonas, /panel/rutas   -> Travel Group Peru (RF08) o administrador
+ *   - /panel/servicios, /panel/horarios -> PeruRail (RF13) o administrador
+ *   - /panel/parametros, /panel/gestores -> solo administrador (RF12)
+ */
 @Component
 @Order(1)
 public class AuthFilter implements Filter {
+
+    private static final String PREFIJO_PANEL = "/panel";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -28,121 +36,63 @@ public class AuthFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        HttpSession session = req.getSession(false);
+
+        String path = req.getRequestURI().substring(req.getContextPath().length());
+
+        // Recursos estaticos y portal publico: sin restriccion
+        if (!path.startsWith(PREFIJO_PANEL)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.setHeader("Pragma", "no-cache");
         res.setHeader("Expires", "0");
 
-        String path = req.getRequestURI().substring(req.getContextPath().length());
+        HttpSession session = req.getSession(false);
+        Usuario usuario = session == null ? null : (Usuario) session.getAttribute("usuario");
 
-        if ("/index.jsp".equals(path) || "/".equals(path)) {
-            res.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
-
-        boolean isStaticResource = path.startsWith("/assets/") ||
-                path.startsWith("/css/") ||
-                path.startsWith("/js/") ||
-                path.endsWith(".css") ||
-                path.endsWith(".js") ||
-                path.endsWith(".png") ||
-                path.endsWith(".jpg") ||
-                path.endsWith(".jpeg") ||
-                path.endsWith(".ico");
-
-        boolean isPublicPage = path.equals("/login") ||
-                path.equals("/auth/login") ||
-                path.equals("/auth/logout") ||
-                path.startsWith("/views/components/") ||
-                path.startsWith("/views/shared/");
-
-        if (isStaticResource) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        Empleado usuario = (session != null) ? (Empleado) session.getAttribute("usuario") : null;
-        boolean isLoggedIn = usuario != null;
-
-        if (!isLoggedIn && !isPublicPage) {
-            if (path.startsWith("/api/")) {
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        if (usuario == null) {
+            if (esPeticionAjax(req)) {
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Sesión expirada");
             } else {
-                res.sendRedirect(req.getContextPath() + "/login");
+                res.sendRedirect(req.getContextPath() + "/acceso?destino="
+                        + java.net.URLEncoder.encode(path, java.nio.charset.StandardCharsets.UTF_8));
             }
             return;
         }
 
-        if (isLoggedIn && (path.equals("/login") || path.equals("/auth/login"))) {
-            if (usuario.isAdmin()) {
-                res.sendRedirect(req.getContextPath() + "/dashboard");
-            } else {
-                res.sendRedirect(req.getContextPath() + "/empleado");
-            }
+        if (!tienePermiso(usuario, path)) {
+            res.sendRedirect(req.getContextPath() + "/panel?denegado=1");
             return;
-        }
-
-        boolean isAdminRoute = path.startsWith("/views/admin/") ||
-                path.equals("/dashboard") ||
-                path.startsWith("/empleados") ||
-                path.startsWith("/sucursales") ||
-                path.startsWith("/reportes") ||
-                path.startsWith("/plantillas") ||
-                path.startsWith("/horarios") ||
-                path.startsWith("/tipoturno") ||
-                path.startsWith("/feriados") ||
-                path.startsWith("/parametros") ||
-                path.startsWith("/empresas") ||
-                path.startsWith("/admin/asistencias") ||
-                path.startsWith("/asistencias");
-
-        if (isLoggedIn && isAdminRoute) {
-            boolean tieneAcceso = false;
-
-            if (usuario.isAdmin()) {
-                tieneAcceso = true;
-
-                if (path.startsWith("/empresas")) {
-                    tieneAcceso = usuario.isSuperAdmin() || usuario.tieneAccesoTodasEmpresas();
-                } else if (path.startsWith("/sucursales")) {
-                    tieneAcceso = usuario.isSuperAdmin() || usuario.tieneAccesoTodasSucursales();
-                } else if (path.startsWith("/parametros")) {
-                    tieneAcceso = usuario.tieneAccesoTotalSistema();
-                }
-            } else if ("PERSONALIZADO".equals(usuario.getRol())) {
-                Collection<Permiso> permisos = usuario.getPermisos();
-                if (permisos != null) {
-                    if (path.startsWith("/empleados") &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("GESTIONAR_EMPLEADOS"))) {
-                        tieneAcceso = true;
-                    } else if (path.startsWith("/reportes") &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("VER_REPORTES"))) {
-                        tieneAcceso = true;
-                    } else if (path.startsWith("/justificaciones/admin") &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("APROBAR_JUSTIFICACIONES"))) {
-                        tieneAcceso = true;
-                    } else if ((path.startsWith("/sucursales") || path.startsWith("/parametros")
-                            || path.startsWith("/plantillas")) &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("CONFIGURACION_SISTEMA"))) {
-                        tieneAcceso = true;
-                    } else if ((path.startsWith("/horarios") || path.startsWith("/tipoturno")
-                            || path.startsWith("/asistencias")) &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("EDITAR_HORARIOS"))) {
-                        tieneAcceso = true;
-                    } else if (path.startsWith("/dashboard") &&
-                            permisos.stream().anyMatch(p -> p.getNombre().equals("VER_DASHBOARD_TOTAL"))) {
-                        tieneAcceso = true;
-                    }
-                }
-            }
-
-            if (!tieneAcceso) {
-                res.sendRedirect(req.getContextPath() + "/empleado");
-                return;
-            }
         }
 
         chain.doFilter(request, response);
+    }
+
+    private boolean tienePermiso(Usuario usuario, String path) {
+        if (usuario.isAdmin()) {
+            return true;
+        }
+        if (path.startsWith("/panel/zonas") || path.startsWith("/panel/rutas")
+                || path.startsWith("/panel/categorias")) {
+            return usuario.isPuedeGestionarZonas();
+        }
+        if (path.startsWith("/panel/ferroviario") || path.startsWith("/panel/servicios")
+                || path.startsWith("/panel/horarios")) {
+            return usuario.isPuedeGestionarFerroviario();
+        }
+        if (path.startsWith("/panel/parametros") || path.startsWith("/panel/gestores")
+                || path.startsWith("/panel/estaciones/guardar") || path.startsWith("/panel/estaciones/eliminar")) {
+            return usuario.isPuedeConfigurarPlataforma();
+        }
+        // Panel principal, listado de estaciones (RF09, solo lectura) y bitacora
+        return true;
+    }
+
+    private boolean esPeticionAjax(HttpServletRequest req) {
+        String accept = req.getHeader("Accept");
+        return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"))
+                || (accept != null && accept.contains("application/json"));
     }
 }

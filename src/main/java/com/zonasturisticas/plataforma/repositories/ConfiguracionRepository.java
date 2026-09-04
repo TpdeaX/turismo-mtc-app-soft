@@ -1,28 +1,14 @@
 package com.zonasturisticas.plataforma.repositories;
 
+import com.zonasturisticas.plataforma.beans.Configuracion;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+/** RF12: parametros generales de la plataforma. */
+public interface ConfiguracionRepository extends JpaRepository<Configuracion, String> {
 
-import com.zonasturisticas.plataforma.beans.Configuracion;
+    List<Configuracion> findAllByOrderByGrupoAscClaveAsc();
 
-@Repository
-public interface ConfiguracionRepository extends JpaRepository<Configuracion, Long> {
-    Configuracion findByClave(String clave);
-
-    // Buscar por clave y empresa específica
-    Configuracion findByClaveAndEmpresaId(String clave, Integer empresaId);
-
-    // Buscar configuraciones globales (sin empresa)
-    Configuracion findByClaveAndEmpresaIsNull(String clave);
-
-    // Listar todas las configuraciones de una empresa
-    List<Configuracion> findByEmpresaId(Integer empresaId);
-
-    // Listar configuraciones globales
-    List<Configuracion> findByEmpresaIsNull();
-
-    // Listar configuraciones por empresa o globales
-    List<Configuracion> findByEmpresaIdOrEmpresaIsNull(Integer empresaId);
+    List<Configuracion> findByGrupoOrderByClaveAsc(String grupo);
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_0.xsd"
+        version="3.0">
+
+    <description>Funciones de presentación de la Plataforma de Zonas Turísticas MTC</description>
+    <tlib-version>1.0</tlib-version>
+    <short-name>mtc</short-name>
+    <uri>http://zonasturisticas.com/mtc</uri>
+
+    <function>
+        <name>fecha</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String fecha(java.time.LocalDateTime)</function-signature>
+    </function>
+
+    <function>
+        <name>fechaCorta</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String fechaCorta(java.time.LocalDateTime)</function-signature>
+    </function>
+
+    <function>
+        <name>soloFecha</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String soloFecha(java.time.LocalDate)</function-signature>
+    </function>
+
+    <function>
+        <name>hora</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String hora(java.time.LocalTime)</function-signature>
+    </function>
+
+    <function>
+        <name>diaCorto</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String diaCorto(java.time.LocalDate)</function-signature>
+    </function>
+
+    <function>
+        <name>esHoy</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>boolean esHoy(java.time.LocalDate)</function-signature>
+    </function>
+
+    <function>
+        <name>relativo</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String relativo(java.time.LocalDateTime)</function-signature>
+    </function>
+
+    <function>
+        <name>soles</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String soles(java.math.BigDecimal)</function-signature>
+    </function>
+
+    <function>
+        <name>solesCorto</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String solesCorto(java.math.BigDecimal)</function-signature>
+    </function>
+
+    <function>
+        <name>recorte</name>
+        <function-class>com.zonasturisticas.plataforma.util.Formato</function-class>
+        <function-signature>java.lang.String recorte(java.lang.String, int)</function-signature>
+    </function>
+
+</taglib>
