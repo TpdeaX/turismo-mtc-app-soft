@@ -7,13 +7,13 @@
         <div class="grid grid-4">
 
             <div>
-                <div class="brand mb-3">
+                <div class="brand mb-4" style="flex-wrap:wrap">
                     <span class="brand-mark">
-                        <img src="${ctx}/assets/img/logo-mtc.svg" alt="MTC Perú" width="40" height="40">
+                        <img src="${ctx}/assets/img/logo-mtc.png" alt="${parametros['plataforma.nombre']}" width="40" height="40">
                     </span>
-                    <span>
-                        <span class="brand-name" style="color:#fff">MTC PERÚ</span><br>
-                        <span class="brand-sub">Turismo y Transporte</span>
+                    <span style="display:block;width:100%">
+                        <span class="brand-name" style="color:#fff">${parametros['plataforma.nombre']}</span><br>
+                        <span class="brand-sub">${parametros['plataforma.lema']}</span>
                     </span>
                 </div>
                 <p style="max-width:34ch;line-height:1.65">
@@ -35,15 +35,24 @@
             <div>
                 <h5>Fuentes integradas</h5>
                 <div class="col g-2" style="align-items:flex-start">
-                    <span class="marca marca-sm" data-marca="SENAMHI">
-                        <img src="${ctx}/assets/img/logos-oficiales/senamhi.svg" data-logo-oficial alt="SENAMHI" loading="lazy">
-                    </span>
-                    <span class="marca marca-sm" data-marca="PeruRail">
-                        <img src="${ctx}/assets/img/logos-oficiales/perurail.svg" data-logo-oficial alt="PeruRail" loading="lazy">
-                    </span>
-                    <span class="marca marca-sm" data-marca="Travel Group Perú">
-                        <img src="${ctx}/assets/img/logos-oficiales/travel-group-peru.svg" data-logo-oficial alt="Travel Group Perú" loading="lazy">
-                    </span>
+                    <div class="row center g-3">
+                        <span class="marca marca-sm" data-marca="SENAMHI">
+                            <img src="${ctx}/assets/img/logos-oficiales/senamhi.svg" data-logo-oficial alt="SENAMHI" loading="lazy">
+                        </span>
+                        <span>SENAMHI</span>
+                    </div>
+                    <div class="row center g-3">
+                        <span class="marca marca-sm" data-marca="PeruRail">
+                            <img src="${ctx}/assets/img/logos-oficiales/perurail.svg" data-logo-oficial alt="PeruRail" loading="lazy">
+                        </span>
+                        <span>PeruRail</span>
+                    </div>
+                    <div class="row center g-3">
+                        <span class="marca marca-sm" data-marca="Travel Group Perú">
+                            <img src="${ctx}/assets/img/logos-oficiales/travel-group-peru.svg" data-logo-oficial alt="Travel Group Perú" loading="lazy">
+                        </span>
+                        <span>Travel Group Perú</span>
+                    </div>
                 </div>
             </div>
 
@@ -61,11 +70,11 @@
             <span class="row center g-3" style="flex-wrap:wrap">
                 <span class="marca marca-sm" data-marca="MTC">
                     <img src="${ctx}/assets/img/logos-oficiales/mtc.svg" data-logo-oficial
-                         alt="Ministerio de Transportes y Comunicaciones" loading="lazy">
+                         alt="${parametros['plataforma.entidad']}" loading="lazy">
                 </span>
-                <span>Ministerio de Transportes y Comunicaciones · Plataforma de Zonas Turísticas</span>
+                <span>${parametros['plataforma.entidad']} · Plataforma de Zonas Turísticas</span>
             </span>
-            <span>El sistema no realiza venta ni reserva de boletos de tren.</span>
+            <span>${parametros['portal.aviso_legal']}</span>
         </div>
     </div>
 </footer>

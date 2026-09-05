@@ -39,6 +39,13 @@ public class ZonaTuristica implements Serializable {
     @Column(name = "ZoTuImagen", length = 400)
     private String imagen;
 
+    /* --- Extension: coordenadas para el mapa geografico del recorrido (RF05) --- */
+    @Column(name = "ZoTuLatitud")
+    private Double latitud;
+
+    @Column(name = "ZoTuLongitud")
+    private Double longitud;
+
     @Column(name = "ZoTuCostoReferencial", precision = 8, scale = 2)
     private java.math.BigDecimal costoReferencial;
 
@@ -103,6 +110,12 @@ public class ZonaTuristica implements Serializable {
 
     public String getImagen() { return imagen; }
     public void setImagen(String imagen) { this.imagen = imagen; }
+
+    public Double getLatitud() { return latitud; }
+    public void setLatitud(Double latitud) { this.latitud = latitud; }
+
+    public Double getLongitud() { return longitud; }
+    public void setLongitud(Double longitud) { this.longitud = longitud; }
 
     public java.math.BigDecimal getCostoReferencial() { return costoReferencial; }
     public void setCostoReferencial(java.math.BigDecimal costoReferencial) { this.costoReferencial = costoReferencial; }

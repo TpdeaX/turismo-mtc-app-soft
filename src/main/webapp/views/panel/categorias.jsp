@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Categorías de preferencia · MTC Perú</title>
+    <title>Categorías de preferencia · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>

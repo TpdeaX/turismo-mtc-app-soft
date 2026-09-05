@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>${zona.nombre} · MTC Perú</title>
+    <title>${zona.nombre} · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -89,7 +89,7 @@
      ==================================================================== -->
 <section class="section-sm">
     <div class="wrap">
-        <div class="grid" style="grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)">
+        <div class="grid grid-split">
 
             <!-- ============ COLUMNA PRINCIPAL ============ -->
             <div class="col g-5">
@@ -150,34 +150,11 @@
                                     </div>
                                 </div>
 
-                                <!-- Secuencia del recorrido -->
-                                <div class="route-line">
-                                    <div class="route-step gold">
-                                        <div class="s-title">Salida · ${estacion.nombre}</div>
-                                        <div class="s-meta">
-                                            ${estacion.ubicacion}
-                                            <c:if test="${not empty estacion.conexiones}">
-                                                · Conexiones: ${estacion.conexiones}
-                                            </c:if>
-                                        </div>
-                                    </div>
-                                    <div class="route-step">
-                                        <div class="s-title">${ruta.ruta.nombre}</div>
-                                        <div class="s-meta">
-                                            ${ruta.distanciaIdaKm} km a pie · aprox. ${ruta.minutosIda} min
-                                        </div>
-                                    </div>
-                                    <div class="route-step">
-                                        <div class="s-title">Llegada · ${zona.nombre}</div>
-                                        <div class="s-meta">Tiempo de visita a discreción del viajero</div>
-                                    </div>
-                                    <div class="route-step gold">
-                                        <div class="s-title">Retorno · ${estacion.nombre}</div>
-                                        <div class="s-meta">
-                                            Mismo tramo de vuelta · aprox. ${ruta.minutosIda} min
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- Esquema del recorrido -->
+                                <c:set var="mapaEstacion" value="${estacion}" scope="request" />
+                                <c:set var="mapaZona" value="${zona}" scope="request" />
+                                <c:set var="mapaRuta" value="${ruta}" scope="request" />
+                                <jsp:include page="../shared/mapa-recorrido.jsp" />
 
                                 <div class="notice ${ruta.aptaSegunClima ? 'notice-success' : 'notice-warning'} mt-4">
                                     <span class="mi mi-sm">
@@ -224,7 +201,6 @@
                                             <th style="width:52px"></th>
                                             <th>Servicio</th>
                                             <th>Trayecto</th>
-                                            <th>Corredor</th>
                                             <th class="text-right">Estado</th>
                                         </tr>
                                     </thead>
@@ -241,7 +217,6 @@
                                                 </td>
                                                 <td class="cell-strong">${s.nombre}</td>
                                                 <td class="muted">${s.trayecto}</td>
-                                                <td class="muted">${s.corredor}</td>
                                                 <td class="text-right">
                                                     <c:choose>
                                                         <c:when test="${s.estado eq 'ACTIVO'}">

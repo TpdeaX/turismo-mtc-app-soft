@@ -24,7 +24,7 @@ public final class DatasetPeruRail {
     public record HorarioFuente(LocalTime salida, LocalTime llegada, BigDecimal tarifa, String frecuencia) {
     }
 
-    public record ServicioFuente(String nombre, String origen, String destino, String corredor,
+    public record ServicioFuente(String nombre, String origen, String destino,
             List<HorarioFuente> horarios) {
     }
 
@@ -51,7 +51,7 @@ public final class DatasetPeruRail {
     public static List<ServicioFuente> servicios() {
         return List.of(
                 new ServicioFuente("Vistadome 31", "Estación Ollantaytambo", "Estación Machu Picchu Pueblo",
-                        "Cusco - Machupicchu", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(7, 5), LocalTime.of(8, 27),
                                         new BigDecimal("245.00"), "Diario"),
                                 new HorarioFuente(LocalTime.of(10, 32), LocalTime.of(11, 56),
@@ -60,38 +60,38 @@ public final class DatasetPeruRail {
                                         new BigDecimal("232.00"), "Diario"))),
 
                 new ServicioFuente("Expedition 33", "Estación Poroy", "Estación Machu Picchu Pueblo",
-                        "Cusco - Machupicchu", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(8, 25), LocalTime.of(11, 45),
                                         new BigDecimal("198.00"), "Lun - Sáb"),
                                 new HorarioFuente(LocalTime.of(15, 20), LocalTime.of(18, 38),
                                         new BigDecimal("186.00"), "Lun - Sáb"))),
 
                 new ServicioFuente("Hiram Bingham 11", "Estación Poroy", "Estación Machu Picchu Pueblo",
-                        "Cusco - Machupicchu", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(9, 5), LocalTime.of(12, 24),
                                         new BigDecimal("1520.00"), "Mar, Jue, Dom"))),
 
                 new ServicioFuente("Valle Sagrado Express", "Estación Urubamba", "Estación Ollantaytambo",
-                        "Valle Sagrado", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(6, 40), LocalTime.of(7, 15),
                                         new BigDecimal("75.00"), "Diario"),
                                 new HorarioFuente(LocalTime.of(16, 10), LocalTime.of(16, 46),
                                         new BigDecimal("75.00"), "Diario"))),
 
                 new ServicioFuente("Andean Explorer 01", "Estación Wanchaq", "Estación Puno",
-                        "Cusco - Puno", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(8, 0), LocalTime.of(18, 0),
                                         new BigDecimal("1120.00"), "Mié, Sáb"))),
 
                 new ServicioFuente("Titicaca 21", "Estación Puno", "Estación Juliaca",
-                        "Lago Titicaca", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(7, 30), LocalTime.of(8, 20),
                                         new BigDecimal("60.00"), "Diario"),
                                 new HorarioFuente(LocalTime.of(14, 45), LocalTime.of(15, 38),
                                         new BigDecimal("60.00"), "Diario"))),
 
                 new ServicioFuente("Arequipa - Juliaca 09", "Estación Arequipa", "Estación Juliaca",
-                        "Sur Andino", List.of(
+                        List.of(
                                 new HorarioFuente(LocalTime.of(7, 15), LocalTime.of(14, 40),
                                         new BigDecimal("310.00"), "Lun, Vie"))));
     }

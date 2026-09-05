@@ -12,8 +12,10 @@
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0">
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=3.3">
-<link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo-mtc.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css">
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=4.4">
+<link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logo-mtc.png">
 
 <%-- Evita el destello de tema claro antes de que cargue app.js --%>
 <script>

@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Estaciones ferroviarias · MTC Perú</title>
+    <title>Estaciones ferroviarias · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -283,17 +283,25 @@
                         <input class="input" type="text" id="e-conexiones" name="conexiones" maxlength="150"
                                placeholder="Ej. Bus, Taxi, Peatonal">
                     </div>
-                    <div class="field">
-                        <label for="e-lat">Latitud</label>
-                        <input class="input" type="number" id="e-lat" name="latitud" step="0.000001"
-                               placeholder="-13.258500">
+                </div>
+
+                <div class="field span-full" data-map-picker>
+                    <label>Ubicación en el mapa</label>
+                    <div class="map-picker" data-map-target></div>
+                    <div class="form-grid cols-2 mt-2">
+                        <div class="field">
+                            <label for="e-lat">Latitud</label>
+                            <input class="input" type="number" id="e-lat" name="latitud" step="0.000001"
+                                   data-map-lat placeholder="-13.258500">
+                        </div>
+                        <div class="field">
+                            <label for="e-lng">Longitud</label>
+                            <input class="input" type="number" id="e-lng" name="longitud" step="0.000001"
+                                   data-map-lng placeholder="-72.264600">
+                        </div>
                     </div>
-                    <div class="field">
-                        <label for="e-lng">Longitud</label>
-                        <input class="input" type="number" id="e-lng" name="longitud" step="0.000001"
-                               placeholder="-72.264600">
-                        <span class="hint">Necesarias para el pronóstico por zona geográfica.</span>
-                    </div>
+                    <span class="hint">Haz clic en el mapa o arrastra el marcador. Necesarias para el
+                        pronóstico por zona geográfica.</span>
                 </div>
 
                 <div class="notice notice-warning mt-4">

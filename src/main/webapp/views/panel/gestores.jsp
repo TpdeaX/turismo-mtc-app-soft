@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Gestores autorizados · MTC Perú</title>
+    <title>Gestores autorizados · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>

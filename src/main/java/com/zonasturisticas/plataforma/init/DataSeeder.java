@@ -80,7 +80,7 @@ public class DataSeeder implements ApplicationRunner {
         if (zonaRepository.count() == 0) {
             sembrarRutasYZonas();
         } else {
-            actualizarImagenesZonas();
+            actualizarDatosZonas();
         }
 
         if (sincronizarAlInicio) {
@@ -295,14 +295,83 @@ public class DataSeeder implements ApplicationRunner {
                 "Naturaleza", "Gastronomía", "Arquitectura");
     }
 
-    private void actualizarImagenesZonas() {
+    /**
+     * Reajuste de las zonas ya almacenadas: repone la fotografia correcta y
+     * completa las coordenadas de las zonas sembradas que aun no las tengan
+     * (RF05), de modo que el mapa geografico del recorrido funcione tambien
+     * sobre una base de datos creada antes de incorporar ese campo.
+     */
+    private void actualizarDatosZonas() {
         for (ZonaTuristica z : zonaRepository.findAll()) {
+            boolean cambio = false;
+
             String correcta = resolverImagenZona(z.getNombre());
             if (z.getImagen() == null || !z.getImagen().equals(correcta)) {
                 z.setImagen(correcta);
+                cambio = true;
+            }
+
+            double[] coordenadas = resolverCoordenadasZona(z.getNombre());
+            if (coordenadas != null && (z.getLatitud() == null || z.getLongitud() == null)) {
+                z.setLatitud(coordenadas[0]);
+                z.setLongitud(coordenadas[1]);
+                cambio = true;
+            }
+
+            if (cambio) {
                 zonaRepository.save(z);
             }
         }
+    }
+
+    /**
+     * Coordenadas aproximadas (~100 m) de cada atractivo sembrado. Permiten
+     * ubicar la zona en el mapa del recorrido junto a su estacion de partida.
+     * Las zonas registradas desde el panel fijan las suyas con el selector de
+     * mapa del formulario.
+     */
+    public static double[] resolverCoordenadasZona(String nombre) {
+        if (nombre == null) {
+            return null;
+        }
+        String n = nombre.toLowerCase();
+        if (n.contains("plaza de armas") && !n.contains("arequipa")) {
+            return new double[] { -13.516290, -71.978890 };
+        } else if (n.contains("qorikancha")) {
+            return new double[] { -13.520170, -71.975280 };
+        } else if (n.contains("san blas")) {
+            return new double[] { -13.514610, -71.975420 };
+        } else if (n.contains("poroy")) {
+            return new double[] { -13.468000, -72.043000 };
+        } else if (n.contains("conjunto arqueológico") || n.contains("conjunto arqueologico")) {
+            return new double[] { -13.257500, -72.263890 };
+        } else if (n.contains("pueblo inca") || n.contains("viviente")) {
+            return new double[] { -13.258610, -72.263330 };
+        } else if (n.contains("pinkuylluna")) {
+            return new double[] { -13.255280, -72.260560 };
+        } else if (n.contains("mandor")) {
+            return new double[] { -13.149000, -72.558000 };
+        } else if (n.contains("aguas calientes") || n.contains("termales")) {
+            return new double[] { -13.152500, -72.523330 };
+        } else if (n.contains("museo") || n.contains("chávez") || n.contains("chavez")) {
+            return new double[] { -13.162500, -72.534720 };
+        } else if (n.contains("valle sagrado")) {
+            return new double[] { -13.297500, -72.120000 };
+        } else if (n.contains("uros")) {
+            return new double[] { -15.839720, -70.013610 };
+        } else if (n.contains("kuntur wasi")) {
+            return new double[] { -15.843610, -70.032220 };
+        } else if (n.contains("juliaca") || (n.contains("santa catalina") && !n.contains("monasterio"))) {
+            return new double[] { -15.493060, -70.133610 };
+        } else if (n.contains("monasterio")) {
+            return new double[] { -16.395280, -71.537220 };
+        } else if (n.contains("basílica") || n.contains("basilica")
+                || (n.contains("catedral") && n.contains("arequipa"))) {
+            return new double[] { -16.398890, -71.536940 };
+        } else if (n.contains("yanahuara")) {
+            return new double[] { -16.391670, -71.544170 };
+        }
+        return null;
     }
 
     public static String resolverImagenZona(String nombre) {
@@ -371,6 +440,12 @@ public class DataSeeder implements ApplicationRunner {
         z.setCostoReferencial(new BigDecimal(costo));
         z.setEstado(estado);
         z.setImagen(imagen);
+
+        double[] coordenadas = resolverCoordenadasZona(nombre);
+        if (coordenadas != null) {
+            z.setLatitud(coordenadas[0]);
+            z.setLongitud(coordenadas[1]);
+        }
 
         Set<Categoria> set = new LinkedHashSet<>();
         for (String nombreCategoria : categorias) {

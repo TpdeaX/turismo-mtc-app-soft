@@ -20,8 +20,5 @@ public interface ServicioFerroviarioRepository extends JpaRepository<ServicioFer
             + "ORDER BY s.nombre ASC")
     List<ServicioFerroviario> listarPorEstacion(@Param("estacion") Integer estacion);
 
-    @Query("SELECT DISTINCT s.corredor FROM ServicioFerroviario s WHERE s.corredor IS NOT NULL ORDER BY s.corredor")
-    List<String> listarCorredores();
-
     long countByEstado(String estado);
 }

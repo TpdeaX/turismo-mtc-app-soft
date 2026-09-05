@@ -56,14 +56,15 @@ public class AuthFilter implements Filter {
             if (esPeticionAjax(req)) {
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Sesión expirada");
             } else {
-                res.sendRedirect(req.getContextPath() + "/acceso?destino="
-                        + java.net.URLEncoder.encode(path, java.nio.charset.StandardCharsets.UTF_8));
+                req.getSession(true).setAttribute("destino_login", path);
+                res.sendRedirect(req.getContextPath() + "/acceso");
             }
             return;
         }
 
         if (!tienePermiso(usuario, path)) {
-            res.sendRedirect(req.getContextPath() + "/panel?denegado=1");
+            req.getSession().setAttribute("toast_denegado", true);
+            res.sendRedirect(req.getContextPath() + "/panel");
             return;
         }
 

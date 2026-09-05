@@ -95,12 +95,10 @@ public class FerroviarioPanelController {
 
     /** Modulo "Horarios y Precios Ferroviarios" (RF13). */
     @GetMapping("/ferroviario")
-    public String ferroviario(@RequestParam(value = "corredor", required = false) String corredor, Model model) {
+    public String ferroviario(Model model) {
         model.addAttribute("servicios", ferroviarioService.listarServicios());
         model.addAttribute("horarios", ferroviarioService.listarHorarios());
-        model.addAttribute("corredores", ferroviarioService.listarCorredores());
         model.addAttribute("estaciones", estacionService.listar());
-        model.addAttribute("corredorActivo", corredor);
         return "panel/ferroviario";
     }
 
@@ -109,7 +107,6 @@ public class FerroviarioPanelController {
             @RequestParam String nombre,
             @RequestParam Integer origenCodigo,
             @RequestParam Integer destinoCodigo,
-            @RequestParam(required = false) String corredor,
             @RequestParam(required = false) String estado,
             RedirectAttributes flash) {
         try {
@@ -121,7 +118,6 @@ public class FerroviarioPanelController {
             servicio.setNombre(nombre);
             servicio.setOrigen(estacionService.obtener(origenCodigo));
             servicio.setDestino(estacionService.obtener(destinoCodigo));
-            servicio.setCorredor(corredor);
             servicio.setEstado(estado == null || estado.isBlank() ? "ACTIVO" : estado);
             ferroviarioService.guardarServicio(servicio);
 
@@ -201,15 +197,14 @@ public class FerroviarioPanelController {
 
     /** Ajuste porcentual masivo de tarifas ("Update Prices" de la maqueta). */
     @PostMapping("/horarios/tarifas")
-    public String ajustarTarifas(@RequestParam(required = false) String corredor,
-            @RequestParam String porcentaje,
+    public String ajustarTarifas(@RequestParam String porcentaje,
             RedirectAttributes flash) {
         try {
             double p = Double.parseDouble(porcentaje);
             if (p < -90 || p > 200) {
                 throw new IllegalArgumentException("El ajuste debe estar entre -90% y 200%.");
             }
-            int afectados = ferroviarioService.ajustarTarifas(corredor, p);
+            int afectados = ferroviarioService.ajustarTarifas(p);
             flash.addFlashAttribute("toast",
                     "Se actualizaron " + afectados + " tarifa(s) en " + p + "%.");
             flash.addFlashAttribute("toastTipo", "success");

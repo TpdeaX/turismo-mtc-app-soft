@@ -8,11 +8,11 @@
 
             <a href="${ctx}/" class="brand">
                 <span class="brand-mark">
-                    <img src="${ctx}/assets/img/logo-mtc.svg" alt="MTC Perú" width="40" height="40">
+                    <img src="${ctx}/assets/img/logo-mtc.png" alt="${parametros['plataforma.nombre']}" width="40" height="40">
                 </span>
                 <span>
-                    <span class="brand-name">MTC PERÚ</span><br>
-                    <span class="brand-sub">Turismo y Transporte</span>
+                    <span class="brand-name">${parametros['plataforma.nombre']}</span><br>
+                    <span class="brand-sub">${parametros['plataforma.lema']}</span>
                 </span>
             </a>
 

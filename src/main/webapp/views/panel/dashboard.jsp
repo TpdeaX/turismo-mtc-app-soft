@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Panel de control · MTC Perú</title>
+    <title>Panel de control · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -124,16 +124,10 @@
                             ${resumen.ultimaSincronizacionSenamhi.registros} pronósticos almacenados
                         </div>
                     </div>
-                    <div class="card-foot">
-                        <a href="${ctx}/panel/integraciones" class="btn btn-ghost btn-sm btn-block"
-                           style="justify-content:space-between">
-                            Monitoreo de integraciones <span class="mi mi-sm">arrow_forward</span>
-                        </a>
-                    </div>
                 </div>
             </div>
 
-            <div class="grid" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+            <div class="grid grid-split">
 
                 <!-- Alertas del sistema -->
                 <div class="card anim-up d-4">

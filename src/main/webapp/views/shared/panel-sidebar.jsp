@@ -8,10 +8,10 @@
 
     <a href="${ctx}/" class="side-brand">
         <span class="brand-mark">
-            <img src="${ctx}/assets/img/logo-mtc.svg" alt="MTC Perú" width="42" height="42">
+            <img src="${ctx}/assets/img/logo-mtc.png" alt="${parametros['plataforma.nombre']}" width="42" height="42">
         </span>
         <span>
-            <span class="brand-name" style="color:#fff">MTC PERÚ</span><br>
+            <span class="brand-name" style="color:#fff">${parametros['plataforma.nombre']}</span><br>
             <span class="brand-sub">Panel administrativo</span>
         </span>
     </a>
@@ -21,9 +21,6 @@
         <div class="side-group">General</div>
         <a href="${ctx}/panel" class="side-link ${modulo eq 'panel' ? 'active' : ''}">
             <span class="mi mi-sm">dashboard</span> Panel de control
-        </a>
-        <a href="${ctx}/panel/integraciones" class="side-link ${modulo eq 'integraciones' ? 'active' : ''}">
-            <span class="mi mi-sm">sync</span> Integraciones
         </a>
 
         <c:if test="${usuarioSesion.puedeGestionarZonas}">

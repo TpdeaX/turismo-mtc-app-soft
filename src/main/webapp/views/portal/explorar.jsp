@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Explorar destinos · MTC Perú</title>
+    <title>Explorar destinos · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -507,7 +507,7 @@
 
         <div class="modal-foot" style="justify-content:space-between">
             <span class="soft" style="font-size:.8rem">
-                La plataforma no realiza venta ni reserva de boletos.
+                ${parametros['portal.aviso_legal']}
             </span>
             <button type="button" class="btn btn-primary" data-modal-close>Entendido</button>
         </div>

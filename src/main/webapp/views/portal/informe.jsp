@@ -43,10 +43,10 @@
                 <div class="row between center wrap-flex g-3">
                     <div class="brand">
                         <span class="brand-mark">
-                            <img src="${ctx}/assets/img/logo-mtc.svg" alt="MTC Perú" width="40" height="40">
+                            <img src="${ctx}/assets/img/logo-mtc.png" alt="${parametros['plataforma.nombre']}" width="40" height="40">
                         </span>
                         <span>
-                            <span class="brand-name" style="color:#fff">MTC PERÚ</span><br>
+                            <span class="brand-name" style="color:#fff">${parametros['plataforma.nombre']}</span><br>
                             <span class="brand-sub">Informe consolidado</span>
                         </span>
                     </div>
@@ -134,6 +134,15 @@
                                 <div class="v" style="font-size:1.05rem">Peatonal</div>
                             </div>
                         </div>
+
+                        <c:if test="${not empty informe.estacion and not empty informe.zona}">
+                            <div class="mt-4">
+                                <c:set var="mapaEstacion" value="${informe.estacion}" scope="request" />
+                                <c:set var="mapaZona" value="${informe.zona}" scope="request" />
+                                <c:set var="mapaRuta" value="${r}" scope="request" />
+                                <jsp:include page="../shared/mapa-recorrido.jsp" />
+                            </div>
+                        </c:if>
 
                         <div class="notice ${r.aptaSegunClima ? 'notice-success' : 'notice-warning'} mt-4">
                             <span class="mi mi-sm">${r.aptaSegunClima ? 'hiking' : 'umbrella'}</span>
@@ -287,14 +296,14 @@
                     </span>
                     <span class="marca marca-sm marca-borde" data-marca="MTC">
                         <img src="${ctx}/assets/img/logos-oficiales/mtc.svg" data-logo-oficial
-                             alt="Ministerio de Transportes y Comunicaciones" loading="lazy">
+                             alt="${parametros['plataforma.entidad']}" loading="lazy">
                     </span>
                 </div>
                 <div class="row between center wrap-flex g-3">
                     <p class="soft" style="margin:0;font-size:.8rem;max-width:64ch">
-                        Informe generado automáticamente por la Plataforma de Zonas Turísticas del
-                        Ministerio de Transportes y Comunicaciones. Documento dirigido al usuario final
-                        y a Travel Group Perú. El sistema no realiza venta ni reserva de boletos de tren.
+                        Informe generado automáticamente por la Plataforma de Zonas Turísticas de
+                        ${parametros['plataforma.entidad']}. Documento dirigido al usuario final
+                        y a Travel Group Perú. ${parametros['portal.aviso_legal']}
                     </p>
                     <span class="chip chip-outline mono">${informe.folio}</span>
                 </div>

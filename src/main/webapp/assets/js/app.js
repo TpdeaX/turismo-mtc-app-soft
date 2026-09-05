@@ -112,11 +112,15 @@
             el.querySelectorAll('select.select').forEach(initCustomSelect);
             el.querySelectorAll('[data-icon-picker]').forEach(initIconPicker);
             el.querySelectorAll('[data-color-picker]').forEach(initColorPicker);
+            el.querySelectorAll('[data-image-upload]').forEach(initImageUpload);
 
             el.classList.add('open');
             el.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
             Modal.abiertos.push(el);
+
+            // El mapa necesita el contenedor ya visible para medir su tamano.
+            el.querySelectorAll('[data-map-picker]').forEach(initMapaPicker);
 
             var foco = el.querySelector('[data-autofocus], input:not([type=hidden]):not([disabled]), textarea, select, .c-select-trigger');
             if (foco) { setTimeout(function () { foco.focus(); }, 220); }
@@ -275,29 +279,39 @@
        ===================================================================== */
     function cargarRutasDeEstacion(selectEstacion, selectRuta, seleccionado) {
         var codigo = selectEstacion.value;
-        selectRuta.innerHTML = '<option value="">Cargando rutas…</option>';
+
+        // El select cambia de valor en cada paso (a "" mientras carga, luego a
+        // la ruta preseleccionada o de vuelta a ""): se avisa con "change" en
+        // cada uno para que la validacion del modal (boton deshabilitado
+        // mientras un campo obligatorio este vacio) se reevalue con el estado
+        // real, en lugar de quedarse con la foto tomada antes de este fetch.
+        function fijar(html, valor) {
+            selectRuta.innerHTML = html;
+            if (valor) { selectRuta.value = valor; }
+            selectRuta.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        fijar('<option value="">Cargando rutas…</option>');
 
         if (!codigo) {
-            selectRuta.innerHTML = '<option value="">Seleccione primero una estación</option>';
+            fijar('<option value="">Seleccione primero una estación</option>');
             return;
         }
         fetch(selectRuta.dataset.base.replace('{codigo}', codigo))
             .then(function (r) { return r.json(); })
             .then(function (rutas) {
                 if (!rutas.length) {
-                    selectRuta.innerHTML =
-                        '<option value="">Esta estación aún no tiene rutas registradas</option>';
+                    fijar('<option value="">Esta estación aún no tiene rutas registradas</option>');
                     return;
                 }
-                selectRuta.innerHTML = '<option value="">Seleccione una ruta…</option>' +
+                fijar('<option value="">Seleccione una ruta…</option>' +
                     rutas.map(function (r) {
                         return '<option value="' + r.codigo + '">' + r.nombre +
                             ' · ' + r.distanciaKm + ' km · ' + r.dificultad + '</option>';
-                    }).join('');
-                if (seleccionado) { selectRuta.value = seleccionado; }
+                    }).join(''), seleccionado);
             })
             .catch(function () {
-                selectRuta.innerHTML = '<option value="">No se pudieron cargar las rutas</option>';
+                fijar('<option value="">No se pudieron cargar las rutas</option>');
             });
     }
 
@@ -1240,7 +1254,829 @@
     }
 
     /* =====================================================================
-       8. ARRANQUE
+       7.9. CARTOGRAFIA (MapLibre GL)
+       Fuentes sin clave de API: imagen satelital y etiquetas de Esri para la
+       vista 3D, base cartografica clara de CARTO para la vista 2D y el modelo
+       de elevacion publico de AWS Terrain Tiles para el relieve.
+       ===================================================================== */
+    var CENTRO_PERU = [-71.9785, -13.5170]; // MapLibre trabaja en [lng, lat]
+
+    var TESELAS_SATELITE = [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+    ];
+    var TESELAS_ETIQUETAS = [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+    ];
+    // Base topografica: relieve sombreado y curvas de nivel ya dibujados, mucho
+    // mas legible que una base clara para un recorrido de montana.
+    var TESELAS_TOPO = [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+    ];
+    var TESELAS_RELIEVE = ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'];
+    var TESELAS_FERROVIARIA = ['https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'];
+
+    var ATRIB_TOPO = 'Cartografía &copy; Esri, USGS, NGA, &copy; OpenStreetMap';
+    var ATRIB_SATELITE = 'Imágenes &copy; Esri, Maxar, Earthstar Geographics';
+    var ATRIB_FERROVIARIA = 'Vías &copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>';
+
+    /** Ruteo peatonal publico de FOSSGIS (OSRM), sin clave de API. */
+    var RUTEO_PEATONAL = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/';
+
+    /** Base legible para el selector de coordenadas de los modales. */
+    function estiloPlano() {
+        return {
+            version: 8,
+            sources: {
+                topo: { type: 'raster', tiles: TESELAS_TOPO, tileSize: 256, maxzoom: 19, attribution: ATRIB_TOPO }
+            },
+            layers: [{ id: 'base-topo', type: 'raster', source: 'topo' }]
+        };
+    }
+
+    /**
+     * Estilo del recorrido con las dos vistas cargadas a la vez: alternar entre
+     * 3D y 2D solo cambia la visibilidad de las capas, asi no hay que recargar
+     * el estilo ni volver a crear el trazo.
+     */
+    function estiloRecorrido() {
+        return {
+            version: 8,
+            sources: {
+                topo: { type: 'raster', tiles: TESELAS_TOPO, tileSize: 256, maxzoom: 19, attribution: ATRIB_TOPO },
+                satelite: { type: 'raster', tiles: TESELAS_SATELITE, tileSize: 256, maxzoom: 19, attribution: ATRIB_SATELITE },
+                etiquetas: { type: 'raster', tiles: TESELAS_ETIQUETAS, tileSize: 256, maxzoom: 19 },
+                ferroviaria: {
+                    type: 'raster', tiles: TESELAS_FERROVIARIA, tileSize: 256,
+                    maxzoom: 19, attribution: ATRIB_FERROVIARIA
+                },
+                relieve: {
+                    type: 'raster-dem', tiles: TESELAS_RELIEVE, tileSize: 256,
+                    maxzoom: 14, encoding: 'terrarium', attribution: 'Relieve &copy; AWS Terrain Tiles'
+                }
+            },
+            layers: [
+                // Vista 2D: carta topografica (ya trae curvas de nivel y sombreado)
+                { id: 'base-topo', type: 'raster', source: 'topo', layout: { visibility: 'none' } },
+                // Vista 3D: satelite real drapeado sobre el terreno + toponimia
+                { id: 'base-satelite', type: 'raster', source: 'satelite' },
+                { id: 'toponimia', type: 'raster', source: 'etiquetas', paint: { 'raster-opacity': 0.9 } },
+                // Capa conmutable con el trazado exacto de las vias ferreas
+                {
+                    id: 'via-ferrea', type: 'raster', source: 'ferroviaria',
+                    layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.95 }
+                }
+            ]
+        };
+    }
+
+    function hayMapLibre() {
+        return typeof maplibregl !== 'undefined'
+            && (typeof maplibregl.supported !== 'function' || maplibregl.supported());
+    }
+
+    /** Marcador con la estetica de los alfileres del esquema del recorrido. */
+    function pinMapa(tipo, icono, etiqueta, subtitulo) {
+        var el = document.createElement('div');
+        el.className = 'geomap-marca geomap-marca-' + tipo + (etiqueta ? ' geomap-marca-pulso' : '');
+        var texto = '';
+        if (etiqueta) {
+            texto = '<span class="geomap-etiqueta"><b></b><i></i></span>';
+        }
+        el.innerHTML = '<span class="geomap-punto"><span class="mi mi-sm">' + icono + '</span></span>' + texto;
+        if (etiqueta) {
+            el.querySelector('.geomap-etiqueta b').textContent = etiqueta;
+            el.querySelector('.geomap-etiqueta i').textContent = subtitulo || '';
+        }
+        return el;
+    }
+
+    /**
+     * Control propio: alterna vista 3D/2D (excluyentes) y enciende o apaga la
+     * capa con el trazado de las vias ferreas (independiente de la vista).
+     */
+    function controlVista(alCambiarVista, alAlternarVia) {
+        return {
+            onAdd: function () {
+                var caja = document.createElement('div');
+                caja.className = 'maplibregl-ctrl maplibregl-ctrl-group geomap-vista';
+
+                var vistas = [];
+                ['3D', '2D'].forEach(function (modo) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.textContent = modo;
+                    b.title = modo === '3D'
+                        ? 'Vista con relieve e imagen satelital'
+                        : 'Carta topográfica plana';
+                    b.className = modo === '3D' ? 'is-activo' : '';
+                    b.addEventListener('click', function () {
+                        vistas.forEach(function (o) { o.classList.remove('is-activo'); });
+                        b.classList.add('is-activo');
+                        alCambiarVista(modo.toLowerCase());
+                    });
+                    vistas.push(b);
+                    caja.appendChild(b);
+                });
+
+                var via = document.createElement('button');
+                via.type = 'button';
+                via.className = 'geomap-vista-via';
+                via.title = 'Mostrar el trazado de las vías férreas';
+                via.setAttribute('aria-label', 'Mostrar el trazado de las vías férreas');
+                via.innerHTML = '<span class="mi mi-sm">tram</span>';
+                via.addEventListener('click', function () {
+                    var encendida = via.classList.toggle('is-activo');
+                    alAlternarVia(encendida);
+                });
+                caja.appendChild(via);
+
+                this._caja = caja;
+                return caja;
+            },
+            onRemove: function () {
+                if (this._caja && this._caja.parentNode) { this._caja.parentNode.removeChild(this._caja); }
+            }
+        };
+    }
+
+    /* =====================================================================
+       7.9.1. SELECTOR DE COORDENADAS EN MAPA
+       Mapa pequeno con un marcador arrastrable que llena los inputs numericos
+       de latitud/longitud ya existentes. Se usa en los modales de Estacion y
+       Zona turistica (RF05 / RF11). Se mantiene plano (sin inclinacion) para
+       que el clic caiga exactamente donde apunta el gestor.
+       ===================================================================== */
+    function initMapaPicker(root) {
+        if (!root || !hayMapLibre()) { return; }
+
+        var mapEl = root.querySelector('[data-map-target]');
+        var latInput = root.querySelector('[data-map-lat]');
+        var lngInput = root.querySelector('[data-map-lng]');
+        if (!mapEl || !latInput || !lngInput) { return; }
+
+        if (root.dataset.mapPickerInit) {
+            if (root._mapaPickerInvalidate) { setTimeout(root._mapaPickerInvalidate, 60); }
+            return;
+        }
+        root.dataset.mapPickerInit = 'true';
+
+        var lat = parseFloat(latInput.value);
+        var lng = parseFloat(lngInput.value);
+        var tieneValor = !isNaN(lat) && !isNaN(lng);
+        var centro = tieneValor ? [lng, lat] : CENTRO_PERU;
+
+        var mapa = new maplibregl.Map({
+            container: mapEl,
+            style: estiloPlano(),
+            center: centro,
+            zoom: tieneValor ? 14 : 5,
+            attributionControl: false
+        });
+        mapa.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+
+        var marcador = new maplibregl.Marker({
+            element: pinMapa('zona', 'place'), draggable: true, anchor: 'bottom'
+        }).setLngLat(centro).addTo(mapa);
+
+        function fijarCampos(lngLat) {
+            latInput.value = lngLat.lat.toFixed(6);
+            lngInput.value = lngLat.lng.toFixed(6);
+        }
+
+        marcador.on('drag', function () { fijarCampos(marcador.getLngLat()); });
+        mapa.on('click', function (ev) {
+            marcador.setLngLat(ev.lngLat);
+            fijarCampos(ev.lngLat);
+        });
+
+        // poblarModal() emite "change" al rellenar el formulario en modo edicion
+        function sincronizarDesdeCampos() {
+            var la = parseFloat(latInput.value);
+            var lo = parseFloat(lngInput.value);
+            if (!isNaN(la) && !isNaN(lo)) {
+                marcador.setLngLat([lo, la]);
+                mapa.jumpTo({ center: [lo, la], zoom: Math.max(mapa.getZoom(), 14) });
+            }
+        }
+        latInput.addEventListener('change', sincronizarDesdeCampos);
+        lngInput.addEventListener('change', sincronizarDesdeCampos);
+
+        root._mapaPickerInvalidate = function () { mapa.resize(); };
+        setTimeout(root._mapaPickerInvalidate, 60);
+    }
+
+    /* =====================================================================
+       7.10. MAPA DEL RECORRIDO (portal publico)
+       Vista 3D: imagen satelital drapeada sobre el modelo de elevacion, con la
+       camara inclinada y orientada a lo largo del tramo, de modo que se aprecia
+       el desnivel real entre la estacion y la zona turistica.
+       Vista 2D: carta topografica con curvas de nivel y relieve sombreado.
+       El trazo no es una recta: se pide el recorrido real por caminos a un
+       servicio de ruteo peatonal (ver trazarRutaReal). Un boton adicional
+       superpone el trazado exacto de las vias ferreas.
+       El selector 3D/2D solo alterna capas y camara sobre el mismo estilo.
+       Sustituye al esquema SVG siempre que ambos puntos tengan coordenadas
+       (ver shared/mapa-recorrido.jsp).
+       ===================================================================== */
+    var CAPAS_3D = ['base-satelite', 'toponimia'];
+    var CAPAS_2D = ['base-topo'];
+
+    function initGeomap(el) {
+        if (!el || el.dataset.geomapInit) { return; }
+
+        var estLat = parseFloat(el.dataset.estLat), estLng = parseFloat(el.dataset.estLng);
+        var zonaLat = parseFloat(el.dataset.zonaLat), zonaLng = parseFloat(el.dataset.zonaLng);
+        if (isNaN(estLat) || isNaN(estLng) || isNaN(zonaLat) || isNaN(zonaLng)) { return; }
+
+        if (!hayMapLibre()) {
+            mostrarEsquemaDeRespaldo(el, 'Tu navegador no puede mostrar el mapa.');
+            return;
+        }
+        el.dataset.geomapInit = 'true';
+
+        var estacion = [estLng, estLat];
+        var zona = [zonaLng, zonaLat];
+        var rumbo = rumboEntre(estacion, zona);
+
+        // Estado compartido por el selector de vista y por el ruteo: evita
+        // pasarse los mismos datos entre callbacks y que se desincronicen.
+        el._geo = { estacion: estacion, zona: zona, rumbo: rumbo, puntos: null, modo: '3d' };
+
+        var loader = el.querySelector('[data-geomap-loader]');
+
+        var mapa = new maplibregl.Map({
+            container: el,
+            style: estiloRecorrido(),
+            center: [(estLng + zonaLng) / 2, (estLat + zonaLat) / 2],
+            zoom: 14,
+            pitch: 64,          // camara inclinada: es lo que da la sensacion 3D
+            maxPitch: 80,       // por defecto MapLibre corta en 60
+            bearing: rumbo,
+            attributionControl: true,
+            cooperativeGestures: true,  // la rueda solo hace zoom con Ctrl
+            fadeDuration: 300           // suaviza la transicion entre teselas
+        });
+
+        // Red de seguridad: si el lienzo WebGL no llega a dibujarse (sin GPU
+        // disponible, contexto perdido o la pestana nunca se pinta), se muestra
+        // el esquema en lugar de dejar un recuadro vacio.
+        var vigilante = setTimeout(function () {
+            if (!mapa.isStyleLoaded()) {
+                if (loader) { loader.classList.add('is-hidden'); }
+                try { mapa.remove(); } catch (e) { /* ya destruido */ }
+                mostrarEsquemaDeRespaldo(el, 'No se pudo cargar el mapa.');
+            }
+        }, 12000);
+        mapa.on('style.load', function () { clearTimeout(vigilante); });
+        mapa.on('webglcontextlost', function () {
+            clearTimeout(vigilante);
+            if (loader) { loader.classList.add('is-hidden'); }
+            mostrarEsquemaDeRespaldo(el, 'No se pudo cargar el mapa.');
+        });
+
+        mapa.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+        mapa.addControl(new maplibregl.FullscreenControl(), 'top-right');
+        mapa.addControl(controlVista(
+            function (modo) { aplicarVista(mapa, el, modo); },
+            function (encendida) {
+                if (mapa.getLayer('via-ferrea')) {
+                    mapa.setLayoutProperty('via-ferrea', 'visibility', encendida ? 'visible' : 'none');
+                }
+            }
+        ), 'top-left');
+        el._mapa = mapa;   // accesible para depuracion desde la consola
+
+        mapa.on('load', function () {
+            // Ocultar el spinner de carga con transicion suave
+            if (loader) { loader.classList.add('is-hidden'); }
+
+            aplicarVista(mapa, el, '3d');
+
+            // Se dibuja de inmediato el tramo recto y luego se reemplaza por el
+            // trazado real por caminos, para no dejar el mapa vacio mientras
+            // responde el servicio de ruteo.
+            mapa.addSource('recorrido', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature', properties: {},
+                    geometry: { type: 'LineString', coordinates: [estacion, zona] }
+                }
+            });
+            mapa.addLayer({
+                id: 'recorrido-borde', type: 'line', source: 'recorrido',
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: { 'line-color': '#0A1F3D', 'line-width': 11, 'line-opacity': 0.45, 'line-blur': 2 }
+            });
+            mapa.addLayer({
+                id: 'recorrido-base', type: 'line', source: 'recorrido',
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: { 'line-color': '#FFFFFF', 'line-width': 6, 'line-opacity': 0.85 }
+            });
+            mapa.addLayer({
+                id: 'recorrido-trazo', type: 'line', source: 'recorrido',
+                layout: { 'line-cap': 'butt', 'line-join': 'round' },
+                paint: { 'line-color': '#F5C518', 'line-width': 3.4, 'line-dasharray': [1.4, 1.1] }
+            });
+
+            encuadrarRecorrido(mapa, el, false);
+            trazarRutaReal(mapa, el, estacion, zona);
+        });
+
+        mapa.on('error', function (ev) {
+            // Las teselas de relieve pueden fallar sin invalidar el mapa base
+            if (ev && ev.sourceId === 'relieve') { return; }
+        });
+
+        new maplibregl.Marker({
+            element: pinMapa('estacion', 'tram', el.dataset.estNombre, 'Salida y retorno'),
+            anchor: 'bottom'
+        }).setLngLat(estacion).addTo(mapa);
+
+        new maplibregl.Marker({
+            element: pinMapa('zona', 'flag', el.dataset.zonaNombre, 'Destino'),
+            anchor: 'bottom'
+        }).setLngLat(zona).addTo(mapa);
+    }
+
+    /**
+     * Sustituye el tramo recto por el trazado real por caminos y senderos
+     * (servicio publico de ruteo peatonal sobre datos de OpenStreetMap).
+     *
+     * Es una mejora progresiva: si el servicio no responde, tarda demasiado o
+     * devuelve un recorrido incoherente con la distancia registrada por Travel
+     * Group Peru (RN01), se conserva la linea recta. La distancia y el tiempo
+     * que muestra la ficha siguen saliendo de la ruta almacenada, no de aqui.
+     */
+    function trazarRutaReal(mapa, el, estacion, zona) {
+        if (!window.fetch || !window.AbortController) { return; }
+
+        var kmRegistrados = parseFloat(el.dataset.rutaKm);
+        var control = new AbortController();
+        var corte = setTimeout(function () { control.abort(); }, 6000);
+        var url = RUTEO_PEATONAL + estacion.join(',') + ';' + zona.join(',')
+            + '?overview=full&geometries=geojson';
+
+        fetch(url, { signal: control.signal })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (datos) {
+                var ruta = datos && datos.code === 'Ok' && datos.routes && datos.routes[0];
+                var puntos = ruta && ruta.geometry && ruta.geometry.coordinates;
+                if (!puntos || puntos.length < 3) { return; }
+
+                // Descarta desvios absurdos: el trazado no deberia superar el
+                // triple de la distancia registrada para ese tramo.
+                if (!isNaN(kmRegistrados) && kmRegistrados > 0
+                        && ruta.distance > kmRegistrados * 1000 * 3) {
+                    return;
+                }
+                var fuente = mapa.getSource('recorrido');
+                if (!fuente) { return; }
+                fuente.setData({
+                    type: 'Feature', properties: {},
+                    geometry: { type: 'LineString', coordinates: puntos }
+                });
+                el.dataset.rutaReal = 'true';
+                if (el._geo) { el._geo.puntos = puntos; }
+                encuadrarRecorrido(mapa, el, true);
+            })
+            .catch(function () { /* se mantiene el tramo recto */ })
+            .finally(function () { clearTimeout(corte); });
+    }
+
+    var PITCH_3D = 64;
+
+    /**
+     * Alterna entre relieve + satelite (3D) y carta topografica plana (2D).
+     *
+     * Todo el cambio se resuelve en una sola orden de camara: encadenar un
+     * easeTo con un reencuadre diferido hacia que, al volver rapido a 3D, el
+     * temporizador pendiente moviera la camara a mitad de la animacion.
+     * El terreno tampoco se desmonta (setTerrain(null) y volver a montarlo deja
+     * el lienzo en un estado inconsistente): se deja declarado y se aplana
+     * llevando la exageracion a cero.
+     */
+    function aplicarVista(mapa, el, modo) {
+        var geo = el._geo;
+        if (!geo) { return; }
+        geo.modo = modo === '2d' ? '2d' : '3d';
+        var tresD = geo.modo === '3d';
+
+        CAPAS_3D.forEach(function (id) {
+            if (mapa.getLayer(id)) {
+                mapa.setLayoutProperty(id, 'visibility', tresD ? 'visible' : 'none');
+            }
+        });
+        CAPAS_2D.forEach(function (id) {
+            if (mapa.getLayer(id)) {
+                mapa.setLayoutProperty(id, 'visibility', tresD ? 'none' : 'visible');
+            }
+        });
+
+        try {
+            mapa.setTerrain({ source: 'relieve', exaggeration: tresD ? 1.4 : 0 });
+        } catch (e) { /* sin relieve disponible */ }
+
+        encuadrarRecorrido(mapa, el, true);
+    }
+
+    /** Rumbo (grados) de A hacia B, para orientar la camara a lo largo del tramo. */
+    function rumboEntre(a, b) {
+        var rad = Math.PI / 180;
+        var dLng = (b[0] - a[0]) * rad;
+        var lat1 = a[1] * rad, lat2 = b[1] * rad;
+        var y = Math.sin(dLng) * Math.cos(lat2);
+        var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+        return (Math.atan2(y, x) / rad + 360) % 360;
+    }
+
+    /**
+     * Encuadra estacion, zona y —si ya llego— el trazado real, con la
+     * inclinacion y el rumbo que corresponden al modo vigente. Se calcula el
+     * destino con cameraForBounds y se aplica en un unico movimiento, de modo
+     * que nunca hay dos animaciones de camara compitiendo.
+     */
+    function encuadrarRecorrido(mapa, el, animar) {
+        var geo = el._geo;
+        if (!geo) { return; }
+        var tresD = geo.modo !== '2d';
+        var rumbo = tresD ? geo.rumbo : 0;
+
+        var limites = new maplibregl.LngLatBounds(geo.estacion, geo.estacion).extend(geo.zona);
+        (geo.puntos || []).forEach(function (p) { limites.extend(p); });
+
+        var camara = mapa.cameraForBounds(limites, {
+            padding: { top: 110, bottom: 90, left: 80, right: 80 },
+            bearing: rumbo,
+            maxZoom: 16
+        });
+        if (!camara) { return; }
+
+        camara.bearing = rumbo;
+        camara.pitch = tresD ? PITCH_3D : 0;
+        camara.duration = animar ? 800 : 0;
+        if (typeof camara.zoom === 'number') {
+            camara.zoom = Math.min(camara.zoom, 16);
+        }
+        mapa.easeTo(camara);
+    }
+
+    /**
+     * Si el mapa 3D no puede dibujarse, se revela el esquema del recorrido.
+     * La busqueda se limita al bloque del propio mapa: el informe consolidado
+     * puede mostrar varios recorridos en la misma pagina.
+     */
+    function mostrarEsquemaDeRespaldo(el, motivo) {
+        var bloque = el.closest('.route-map-wrap') || document;
+        var respaldo = bloque.querySelector('[data-geomap-fallback]');
+        if (respaldo) {
+            respaldo.hidden = false;
+            el.remove();
+        } else {
+            el.innerHTML = '<div class="geomap-aviso">' + motivo + '</div>';
+        }
+    }
+
+    /**
+     * Los mapas se crean solo cuando se acercan a la pantalla: el informe
+     * consolidado puede listar varios recorridos y cada mapa consume un
+     * contexto WebGL (el navegador limita cuantos puede haber a la vez).
+     */
+    function observarGeomaps() {
+        var mapas = document.querySelectorAll('[data-geomap]');
+        if (!mapas.length) { return; }
+
+        if (!('IntersectionObserver' in window)) {
+            mapas.forEach(initGeomap);
+            return;
+        }
+        var obs = new IntersectionObserver(function (entradas) {
+            entradas.forEach(function (e) {
+                if (e.isIntersecting) {
+                    obs.unobserve(e.target);
+                    initGeomap(e.target);
+                }
+            });
+        }, { rootMargin: '300px 0px' });
+        mapas.forEach(function (m) { obs.observe(m); });
+    }
+
+    /* =====================================================================
+       7.11. SUBIR / ARRASTRAR IMAGEN (zonas turisticas)
+       Complementa al input de URL existente: no cambia el contrato del
+       formulario, solo llena el mismo input con la URL resultante.
+
+       El campo de enlace es solo para imagenes alojadas fuera de la
+       plataforma. Si la foto ya vive aqui -subida al modulo o incluida en
+       assets- su ruta interna no se muestra: no es algo que el gestor deba
+       escribir, y para cambiarla basta con quitar la imagen.
+       ===================================================================== */
+    function initImageUpload(root) {
+        if (!root || root.dataset.imageUploadInit) { return; }
+        root.dataset.imageUploadInit = 'true';
+
+        var urlInput = document.getElementById(root.dataset.imageUrlInput);
+        var fileInput = root.querySelector('input[type=file]');
+        var preview = root.querySelector('.image-drop-preview');
+        var previewImg = preview ? preview.querySelector('img') : null;
+        var vacio = root.querySelector('.image-drop-empty');
+        var estadoEl = root.querySelector('.image-drop-status');
+        var campoEnlace = (root.closest('.field') || document).querySelector('[data-image-url-wrap]');
+        var url = root.dataset.uploadUrl;
+        if (!urlInput || !fileInput || !preview || !vacio || !url) { return; }
+
+        function ctxPath() { return document.documentElement.getAttribute('data-context-path') || ''; }
+
+        function resolverSrc(u) {
+            if (!u) { return ''; }
+            var c = ctxPath();
+            return (u.charAt(0) === '/' && c && u.indexOf(c) !== 0) ? (c + u) : u;
+        }
+
+        /** Interna = servida por la plataforma (subida o incluida en assets). */
+        function esInterna(valor) { return valor.charAt(0) === '/'; }
+
+        function mostrarPreview(src) {
+            if (!src) {
+                preview.hidden = true;
+                vacio.hidden = false;
+                return;
+            }
+            previewImg.src = src;
+            preview.hidden = false;
+            vacio.hidden = true;
+        }
+
+        /**
+         * Refleja el valor actual: vista previa + visibilidad del enlace.
+         * Solo se oculta el enlace ante una ruta interna; mientras el gestor
+         * escribe una direccion externa el campo tiene que seguir a la vista.
+         */
+        function sincronizar() {
+            var valor = urlInput.value.trim();
+            mostrarPreview(resolverSrc(valor));
+            if (campoEnlace) { campoEnlace.hidden = esInterna(valor); }
+        }
+
+        function estado(texto) {
+            if (!estadoEl) { return; }
+            if (texto) {
+                estadoEl.hidden = false;
+                estadoEl.textContent = texto;
+                preview.hidden = true;
+                vacio.hidden = true;
+            } else {
+                estadoEl.hidden = true;
+            }
+        }
+
+        function subir(archivo) {
+            if (!archivo.type || archivo.type.indexOf('image/') !== 0) {
+                toast('Selecciona un archivo de imagen válido.', 'error');
+                return;
+            }
+            var datos = new FormData();
+            datos.append('archivo', archivo);
+            estado('Subiendo imagen…');
+
+            fetch(url, { method: 'POST', body: datos, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, cuerpo: j }; }); })
+                .then(function (res) {
+                    if (!res.ok) { throw new Error(res.cuerpo.error || 'No se pudo subir la imagen.'); }
+                    urlInput.value = res.cuerpo.url;
+                    sincronizar();
+                })
+                .catch(function (e) {
+                    toast(e.message || 'No se pudo subir la imagen.', 'error');
+                    sincronizar();
+                })
+                .finally(function () { estado(''); });
+        }
+
+        root.addEventListener('click', function (ev) {
+            if (ev.target.closest('[data-image-remove]')) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                urlInput.value = '';
+                sincronizar();   // al quitarla vuelve a ofrecerse el enlace externo
+                return;
+            }
+            fileInput.click();
+        });
+        fileInput.addEventListener('click', function (ev) { ev.stopPropagation(); });
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files && fileInput.files[0]) { subir(fileInput.files[0]); }
+            fileInput.value = '';
+        });
+
+        ['dragenter', 'dragover'].forEach(function (tipo) {
+            root.addEventListener(tipo, function (ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                root.classList.add('is-dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(function (tipo) {
+            root.addEventListener(tipo, function (ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                root.classList.remove('is-dragover');
+            });
+        });
+        root.addEventListener('drop', function (ev) {
+            var archivo = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+            if (archivo) { subir(archivo); }
+        });
+
+        urlInput.addEventListener('input', sincronizar);
+        // poblarModal() emite "change" al abrir el modal en modo edicion
+        urlInput.addEventListener('change', sincronizar);
+
+        sincronizar();
+    }
+
+    /* =====================================================================
+       7.12. VALIDACION DE FORMULARIOS EN MODALES
+       Desactiva el boton de guardar mientras falten campos obligatorios
+       (incluyendo un grupo de checkboxes marcado con un asterisco en su
+       etiqueta) y muestra un mensaje breve bajo el campo. Opera sobre la
+       convencion data-submit-once que ya tienen todos los formularios de
+       modal, sin necesidad de tocar cada JSP.
+       ===================================================================== */
+    function gruposCheckboxRequeridos(form) {
+        var grupos = [];
+        form.querySelectorAll('.field').forEach(function (campo) {
+            var marcaReq = campo.querySelector('label .req');
+            var checks = campo.querySelectorAll('input[type=checkbox][data-multi]');
+            if (marcaReq && checks.length) { grupos.push(checks); }
+        });
+        return grupos;
+    }
+
+    function grupoValido(checks) {
+        return Array.prototype.some.call(checks, function (c) { return c.checked; });
+    }
+
+    function esCampoValidable(el) {
+        return !!(el && el.matches && el.matches('input, select, textarea') &&
+            el.type !== 'hidden' && el.type !== 'submit' && el.type !== 'button' &&
+            !(el.type === 'checkbox' && el.hasAttribute('data-multi')));
+    }
+
+    function mensajeCampo(field) {
+        var v = field.validity;
+        if (v.valueMissing) {
+            return field.tagName === 'SELECT' ? 'Selecciona una opción.' : 'Este campo es obligatorio.';
+        }
+        if (v.typeMismatch) {
+            if (field.type === 'email') { return 'Ingresa un correo electrónico válido.'; }
+            if (field.type === 'url') { return 'Ingresa una URL válida (debe iniciar con http:// o https://).'; }
+            return 'El valor ingresado no es válido.';
+        }
+        if (v.rangeUnderflow) { return 'El valor es menor al mínimo permitido (' + field.min + ').'; }
+        if (v.rangeOverflow) { return 'El valor supera el máximo permitido (' + field.max + ').'; }
+        if (v.patternMismatch) { return 'El formato ingresado no es válido.'; }
+        if (v.tooShort) { return 'Escribe al menos ' + field.minLength + ' caracteres.'; }
+        if (v.tooLong) { return 'No puede superar los ' + field.maxLength + ' caracteres.'; }
+        return 'Revisa este campo.';
+    }
+
+    function anclaDe(field) {
+        return field.closest('.c-select-wrap') || field.closest('.input-icon') || field;
+    }
+
+    function marcarInvalido(field, invalido) {
+        var wrap = field.closest('.c-select-wrap');
+        if (wrap) {
+            var trigger = wrap.querySelector('.c-select-trigger');
+            if (trigger) { trigger.classList.toggle('is-invalid', invalido); }
+            return;
+        }
+        field.classList.toggle('is-invalid', invalido);
+    }
+
+    function mostrarError(field) {
+        var ancla = anclaDe(field);
+        var msg = ancla.nextElementSibling;
+        if (!msg || !msg.classList.contains('field-error')) {
+            msg = document.createElement('span');
+            msg.className = 'field-error';
+            ancla.insertAdjacentElement('afterend', msg);
+        }
+        msg.textContent = mensajeCampo(field);
+        marcarInvalido(field, true);
+    }
+
+    function ocultarError(field) {
+        var ancla = anclaDe(field);
+        var msg = ancla.nextElementSibling;
+        if (msg && msg.classList.contains('field-error')) { msg.remove(); }
+        marcarInvalido(field, false);
+    }
+
+    function mostrarErrorGrupo(campoDiv, texto) {
+        var msg = campoDiv.querySelector(':scope > .field-error');
+        if (!msg) {
+            msg = document.createElement('span');
+            msg.className = 'field-error';
+            campoDiv.appendChild(msg);
+        }
+        msg.textContent = texto;
+    }
+
+    function ocultarErrorGrupo(campoDiv) {
+        var msg = campoDiv.querySelector(':scope > .field-error');
+        if (msg) { msg.remove(); }
+    }
+
+    function initValidacionModal(form) {
+        if (!form || form.dataset.validacionInit) { return; }
+        form.dataset.validacionInit = 'true';
+
+        var boton = form.querySelector('button[type=submit]');
+        if (!boton) { return; }
+
+        form._gruposCheckboxReq = gruposCheckboxRequeridos(form);
+
+        // Se lee field.validity.valid campo por campo (en vez de
+        // form.checkValidity()) porque checkValidity() dispara el evento
+        // "invalid" en cada control invalido -incluso sin que el usuario haya
+        // tocado nada- y eso encenderia los bordes en rojo apenas se abre el
+        // modal. El mensaje solo debe aparecer si el usuario deja el campo
+        // vacio (ver el listener de "blur" mas abajo).
+        function actualizar() {
+            var valido = true;
+            form.querySelectorAll('input, select, textarea').forEach(function (el) {
+                if (esCampoValidable(el) && !el.validity.valid) { valido = false; }
+            });
+            form._gruposCheckboxReq.forEach(function (checks) {
+                if (!grupoValido(checks)) { valido = false; }
+            });
+            boton.disabled = !valido;
+            boton.classList.toggle('is-disabled', !valido);
+        }
+
+        // Blur no burbujea: se delega en fase de captura para llegar tanto a
+        // los campos normales como al boton visible de los combobox (el
+        // <select> real queda oculto detras de ese boton).
+        form.addEventListener('blur', function (ev) {
+            var t = ev.target;
+            if (t.classList && t.classList.contains('c-select-trigger')) {
+                var wrap = t.closest('.c-select-wrap');
+                var sel = wrap ? wrap.querySelector('select') : null;
+                if (sel) { sel.checkValidity() ? ocultarError(sel) : mostrarError(sel); }
+                return;
+            }
+            if (esCampoValidable(t)) { t.checkValidity() ? ocultarError(t) : mostrarError(t); }
+        }, true);
+
+        form.addEventListener('input', function (ev) {
+            if (esCampoValidable(ev.target)) {
+                if (ev.target.checkValidity()) { ocultarError(ev.target); }
+                actualizar();
+            }
+        });
+
+        form.addEventListener('change', function (ev) {
+            var t = ev.target;
+            if (esCampoValidable(t)) {
+                if (t.checkValidity()) { ocultarError(t); }
+                actualizar();
+            } else if (t.matches && t.matches('input[type=checkbox][data-multi]')) {
+                var campoDiv = t.closest('.field');
+                if (campoDiv) {
+                    var checks = campoDiv.querySelectorAll('input[type=checkbox][data-multi]');
+                    grupoValido(checks) ? ocultarErrorGrupo(campoDiv)
+                        : mostrarErrorGrupo(campoDiv, 'Selecciona al menos una opción.');
+                }
+                actualizar();
+            }
+        });
+
+        // poblarModal() llama a form.reset() y luego rellena los campos (alta o
+        // edicion): se reevalua un instante despues, cuando ya quedo poblado.
+        form.addEventListener('reset', function () {
+            setTimeout(function () {
+                form.querySelectorAll('.field-error').forEach(function (m) { m.remove(); });
+                form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+                actualizar();
+            }, 30);
+        });
+
+        actualizar();
+    }
+
+    /* =====================================================================
+       8. RECUPERACION TRAS EL BOTON "ATRAS" (bfcache)
+       Si el navegador restaura la pagina desde su cache de retroceso, un
+       formulario recien enviado queda "congelado" en su estado de envio
+       (boton en "Guardando…"), y el login puede no redirigir aunque la
+       sesion ya sea valida (la restauracion no vuelve a ejecutar el
+       controlador). Se fuerza una recarga real contra el servidor.
+       ===================================================================== */
+    window.addEventListener('pageshow', function (ev) {
+        if (ev.persisted) { window.location.reload(); }
+    });
+
+    /* =====================================================================
+       9. ARRANQUE
        ===================================================================== */
     Tema.aplicar(Tema.inicial(), false);
 
@@ -1588,6 +2424,12 @@
         /* --- Inicializar selectores visuales de icono y color --- */
         document.querySelectorAll('[data-icon-picker]').forEach(initIconPicker);
         document.querySelectorAll('[data-color-picker]').forEach(initColorPicker);
+
+        /* --- Mapa 3D del recorrido (portal publico), creado al acercarse --- */
+        observarGeomaps();
+
+        /* --- Validacion de campos obligatorios en los modales --- */
+        document.querySelectorAll('.modal form[data-submit-once]').forEach(initValidacionModal);
 
         /* --- Toast enviado por el servidor (flash attribute) --- */
         var flash = document.getElementById('flash-toast');

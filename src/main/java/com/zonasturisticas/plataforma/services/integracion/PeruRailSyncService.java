@@ -153,7 +153,6 @@ public class PeruRailSyncService {
             servicio.setNombre(sf.nombre());
             servicio.setOrigen(origen);
             servicio.setDestino(destino);
-            servicio.setCorredor(sf.corredor());
             // La fuente puede reportar retrasos operativos puntuales
             servicio.setEstado(random.nextInt(12) == 0 ? "RETRASO" : "ACTIVO");
             servicio = servicioRepository.save(servicio);

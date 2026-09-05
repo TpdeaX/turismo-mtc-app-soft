@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Acceso de gestores · MTC Perú</title>
+    <title>Acceso de gestores · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -19,11 +19,11 @@
 
             <a href="${ctx}/" class="brand mb-6">
                 <span class="brand-mark" style="width:48px;height:48px">
-                    <img src="${ctx}/assets/img/logo-mtc.svg" alt="MTC Perú" width="48" height="48">
+                    <img src="${ctx}/assets/img/logo-mtc.png" alt="${parametros['plataforma.nombre']}" width="48" height="48">
                 </span>
                 <span>
-                    <span class="brand-name" style="color:#fff">MTC PERÚ</span><br>
-                    <span class="brand-sub">Plataforma Oficial de Turismo y Transporte</span>
+                    <span class="brand-name" style="color:#fff">${parametros['plataforma.nombre']}</span><br>
+                    <span class="brand-sub">${parametros['plataforma.lema']}</span>
                 </span>
             </a>
 
@@ -33,7 +33,7 @@
 
             <p class="hero-sub">
                 Espacio reservado para los gestores autorizados de Travel Group Perú, PeruRail y
-                el Ministerio de Transportes y Comunicaciones.
+                ${parametros['plataforma.entidad']}.
             </p>
 
             <div class="col g-3 mt-6" style="background:rgba(255,255,255,.05);padding:18px 20px;border-radius:var(--r-lg);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(6px)">
@@ -99,7 +99,6 @@
             </c:if>
 
             <form method="post" action="${ctx}/acceso" class="col g-4 mt-5" data-submit-once>
-                <input type="hidden" name="destino" value="${destino}">
 
                 <div class="field">
                     <label for="correo">Correo institucional <span class="req">*</span></label>
@@ -171,7 +170,7 @@
             </div>
 
             <p class="soft text-center mt-5" style="font-size:.78rem">
-                Ministerio de Transportes y Comunicaciones<br>
+                ${parametros['plataforma.entidad']}<br>
                 El portal turístico es de acceso libre y no requiere iniciar sesión.
             </p>
         </div>

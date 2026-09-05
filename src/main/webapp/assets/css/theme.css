@@ -12,6 +12,210 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. SPLASH SCREEN (solo portal principal)
+   -------------------------------------------------------------------------- */
+.splash-screen {
+    position: fixed; inset: 0; z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #030b18 0%, #0A1F3D 35%, #0f2e55 70%, #123159 100%);
+    overflow: hidden;
+    transition: opacity .6s cubic-bezier(.4,0,.2,1), visibility .6s cubic-bezier(.4,0,.2,1);
+}
+.splash-screen.is-hidden {
+    opacity: 0; visibility: hidden; pointer-events: none;
+}
+
+/* --- Patrón topográfico SVG de fondo --- */
+.splash-topo {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: .6;
+    animation: splash-topo-drift 25s linear infinite;
+}
+@keyframes splash-topo-drift {
+    0%   { transform: translateX(0) translateY(0); }
+    50%  { transform: translateX(-30px) translateY(-15px); }
+    100% { transform: translateX(0) translateY(0); }
+}
+
+/* --- Partículas brillantes --- */
+.splash-particles { position: absolute; inset: 0; }
+.splash-particles .sp {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    width: var(--s); height: var(--s);
+    background: #F5C518;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(245,197,24,.4);
+    animation: sp-float var(--d) ease-in-out infinite, sp-glow var(--d) ease-in-out infinite;
+}
+@keyframes sp-float {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: .3; }
+    25%  { transform: translateY(-20px) translateX(10px); opacity: .9; }
+    50%  { transform: translateY(-8px) translateX(-8px); opacity: .5; }
+    75%  { transform: translateY(-25px) translateX(5px); opacity: .8; }
+}
+@keyframes sp-glow {
+    0%, 100% { box-shadow: 0 0 4px 1px rgba(245,197,24,.3); }
+    50%  { box-shadow: 0 0 12px 4px rgba(245,197,24,.7); }
+}
+
+/* --- Iconos temáticos flotantes --- */
+.splash-icons { position: absolute; inset: 0; }
+.splash-float-icon {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    display: grid; place-items: center;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px;
+    color: rgba(255,255,255,.12);
+    font-size: 22px;
+    backdrop-filter: blur(2px);
+    animation: icon-drift var(--d) ease-in-out infinite;
+    animation-delay: var(--dl);
+    transition: color .3s, background .3s;
+}
+.splash-float-icon .mi { font-size: 22px; }
+@keyframes icon-drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: .4; }
+    33%  { transform: translateY(-18px) rotate(5deg); opacity: .7; }
+    66%  { transform: translateY(-6px) rotate(-3deg); opacity: .5; }
+}
+
+/* --- Contenido central --- */
+.splash-content {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-align: center; color: #fff;
+    animation: splash-entrance .8s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes splash-entrance {
+    from { opacity: 0; transform: translateY(30px) scale(.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Anillos giratorios concéntricos --- */
+.splash-rings {
+    position: relative;
+    width: 160px; height: 160px;
+    display: grid; place-items: center;
+    margin-bottom: 8px;
+}
+.splash-ring {
+    position: absolute; border-radius: 50%;
+    border: 2px solid transparent;
+}
+.splash-ring-1 {
+    inset: 0;
+    border-top-color: #F5C518;
+    border-right-color: rgba(245,197,24,.3);
+    animation: ring-spin 2.5s linear infinite;
+    box-shadow: 0 0 20px rgba(245,197,24,.15);
+}
+.splash-ring-2 {
+    inset: 12px;
+    border-bottom-color: #5EEAD4;
+    border-left-color: rgba(94,234,212,.3);
+    animation: ring-spin 3.5s linear infinite reverse;
+    box-shadow: 0 0 15px rgba(94,234,212,.1);
+}
+.splash-ring-3 {
+    inset: 24px;
+    border-top-color: rgba(255,255,255,.5);
+    border-right-color: rgba(255,255,255,.1);
+    animation: ring-spin 2s linear infinite;
+}
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+
+.splash-logo {
+    width: 80px; height: 80px; object-fit: contain;
+    position: relative; z-index: 1;
+    filter: drop-shadow(0 0 20px rgba(245,197,24,.3));
+    animation: splash-pulse 2s ease-in-out infinite;
+}
+@keyframes splash-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(245,197,24,.3)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 30px rgba(245,197,24,.5)); }
+}
+
+/* --- Título y subtítulo --- */
+.splash-title {
+    font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 700;
+    margin: 0; letter-spacing: .03em;
+    background: linear-gradient(135deg, #fff 0%, #F5C518 60%, #5EEAD4 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: splash-title-shine 3s ease-in-out infinite;
+}
+@keyframes splash-title-shine {
+    0%, 100% { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+}
+.splash-sub {
+    font-size: .78rem; color: rgba(255,255,255,.45);
+    text-transform: uppercase; letter-spacing: .14em;
+    margin-bottom: 6px;
+}
+
+/* --- Barra de progreso --- */
+.splash-progress {
+    width: 200px; height: 3px;
+    background: rgba(255,255,255,.08);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 12px 0 6px;
+}
+.splash-progress-bar {
+    width: 0%; height: 100%;
+    background: linear-gradient(90deg, #F5C518, #5EEAD4);
+    border-radius: 3px;
+    animation: splash-load 3.5s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes splash-load {
+    0%   { width: 0%; }
+    20%  { width: 25%; }
+    50%  { width: 55%; }
+    80%  { width: 80%; }
+    100% { width: 100%; }
+}
+
+/* --- Chips de funcionalidades --- */
+.splash-features {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .76rem; color: rgba(255,255,255,.45);
+    margin-top: 4px;
+    animation: splash-entrance 1s cubic-bezier(.22,1,.36,1) .3s both;
+}
+.splash-features .mi { font-size: 14px; vertical-align: middle; margin-right: 2px; }
+.splash-dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+}
+
+.splash-hint {
+    font-size: .74rem; color: rgba(255,255,255,.3);
+    margin-top: 8px;
+    animation: splash-hint-blink 1.5s ease-in-out infinite;
+}
+@keyframes splash-hint-blink {
+    0%, 100% { opacity: .3; }
+    50% { opacity: .7; }
+}
+
+/* --- Línea decorativa inferior --- */
+.splash-bottom-line {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #F5C518 30%, #5EEAD4 70%, transparent 100%);
+    animation: splash-line-glow 2s ease-in-out infinite;
+}
+@keyframes splash-line-glow {
+    0%, 100% { opacity: .4; }
+    50% { opacity: .9; }
+}
+
+/* --------------------------------------------------------------------------
    1. TOKENS
    -------------------------------------------------------------------------- */
 :root {
@@ -239,7 +443,7 @@ h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; letter-spacing: -.02em; line-h
 .g-4 { gap: 16px; } .g-5 { gap: 24px; } .g-6 { gap: 32px; }
 
 .grid { display: grid; gap: 16px; }
-.grid-2, .grid-3, .grid-4, .grid-auto { grid-template-columns: 1fr; }
+.grid-2, .grid-3, .grid-4, .grid-auto, .grid-split { grid-template-columns: minmax(0, 1fr); }
 
 .mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:16px}
 .mt-4{margin-top:24px}.mt-5{margin-top:32px}.mt-6{margin-top:48px}
@@ -747,6 +951,18 @@ select.c-select-native {
     color: var(--c-text-soft);
     cursor: not-allowed;
 }
+
+/* Validacion de campos obligatorios en modales (ver app.js) */
+.input.is-invalid, .textarea.is-invalid {
+    border-color: var(--c-danger) !important;
+    box-shadow: 0 0 0 3px rgba(194, 39, 59, .2) !important;
+}
+.field-error {
+    display: block;
+    margin-top: 5px;
+    font-size: .78rem;
+    color: var(--c-danger);
+}
 .c-select-label {
     flex: 1;
     white-space: nowrap;
@@ -975,7 +1191,7 @@ form.card,
 
 /* Grupo de campos dentro de modales */
 .form-grid { display: grid; gap: 14px; }
-.form-grid.cols-2, .form-grid.cols-3 { grid-template-columns: 1fr; }
+.form-grid.cols-2, .form-grid.cols-3 { grid-template-columns: minmax(0, 1fr); }
 .span-2 { grid-column: span 1; }
 .span-full { grid-column: 1 / -1; }
 
@@ -990,7 +1206,7 @@ form.card,
 }
 .filterbar .field { flex: 1; min-width: 180px; }
 
-/* Píldoras de segmento (corredores) */
+/* Píldoras de segmento (pestañas tipo filtro) */
 .segmented { display: inline-flex; gap: 6px; padding: 5px; background: var(--c-surface-3); border-radius: var(--r-pill); overflow-x: auto; max-width: 100%; }
 .segmented a, .segmented button {
     padding: 8px 18px; border-radius: var(--r-pill); border: none; background: transparent;
@@ -1615,24 +1831,321 @@ tr.detail-row .detail-pad { padding: 20px 24px 24px 62px; }
 .difficulty[data-level="3"] i { background: var(--c-danger); }
 
 /* Línea de tiempo de la ruta (ida y vuelta) */
-.route-line { position: relative; padding-left: 30px; }
-.route-line::before {
-    content: '';
-    position: absolute; left: 9px; top: 12px; bottom: 12px;
-    width: 2px;
-    background: repeating-linear-gradient(to bottom, var(--c-primary) 0 6px, transparent 6px 12px);
+/* --------------------------------------------------------------------------
+   16.5. MAPA ESQUEMÁTICO DEL RECORRIDO
+   Diagrama del único tramo peatonal. Los alfileres y el trazo comparten el
+   espacio de coordenadas 0-100 (el SVG usa preserveAspectRatio="none" y
+   vector-effect="non-scaling-stroke"), de modo que quedan alineados en
+   cualquier ancho sin deformar los grosores de línea.
+   -------------------------------------------------------------------------- */
+.route-map-wrap { display: flex; flex-direction: column; gap: 16px; }
+
+.route-map {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background:
+        radial-gradient(120% 90% at 78% 12%, rgba(94, 234, 212, .16), transparent 58%),
+        radial-gradient(110% 80% at 12% 88%, rgba(245, 197, 24, .16), transparent 58%),
+        linear-gradient(155deg, #071630 0%, #0C2444 55%, #0A1F3D 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), var(--sh-2);
+    color: #fff;
 }
-.route-step { position: relative; padding: 10px 0; }
-.route-step::before {
-    content: '';
-    position: absolute; left: -26px; top: 16px;
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--c-surface);
-    border: 3px solid var(--c-primary);
+
+.route-map-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.route-map-canvas .rm-grid { stroke: rgba(255, 255, 255, .07); stroke-width: 1; fill: none; }
+.route-map-canvas .rm-contour { stroke: rgba(127, 176, 236, .20); stroke-width: 1.2; fill: none; }
+.route-map-canvas .rm-route-glow {
+    stroke: rgba(94, 234, 212, .3);
+    stroke-width: 11;
+    stroke-linecap: round;
 }
-.route-step.gold::before { border-color: var(--brand-gold-500); }
-.route-step .s-title { font-weight: 650; }
-.route-step .s-meta { font-size: .84rem; color: var(--c-text-muted); }
+.route-map-canvas .rm-route {
+    stroke: url(#rmTrazo);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+    stroke-dasharray: 0 0;
+}
+
+/* --- Alfileres --- */
+.route-pin {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    width: 34%;
+    text-align: center;
+    pointer-events: none;
+}
+.route-pin .pin-mark {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--pin, #F5C518);
+    color: #0A1F3D;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, .14), 0 6px 16px rgba(0, 0, 0, .45);
+    flex-shrink: 0;
+}
+.route-pin.is-inicio { --pin: #F5C518; }
+.route-pin.is-destino { --pin: #5EEAD4; }
+.route-pin .pin-mark { position: relative; }
+.route-pin .pin-n {
+    position: absolute; top: -4px; right: -4px;
+    width: 17px; height: 17px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: #0A1F3D; color: #fff;
+    font-style: normal; font-size: .6rem; font-weight: 750;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .22);
+}
+
+/*
+ * Con el esquema angosto las tres etiquetas se pisan entre sí. En el teléfono
+ * solo quedan los alfileres numerados: los nombres ya están en la lista de abajo.
+ * Las etiquetas vuelven a partir de 640 px (ver sección 19).
+ */
+
+.route-pin .pin-tag {
+    display: none;
+    padding: 5px 10px;
+    border-radius: var(--r-sm);
+    background: rgba(6, 16, 32, .74);
+    border: 1px solid rgba(255, 255, 255, .14);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    max-width: 100%;
+}
+.route-pin .pin-tag b {
+    display: block;
+    font-size: .78rem; font-weight: 700; line-height: 1.25;
+    color: #fff;
+}
+.route-pin .pin-tag i {
+    display: block;
+    font-style: normal;
+    font-size: .66rem; letter-spacing: .06em; text-transform: uppercase;
+    color: rgba(255, 255, 255, .58);
+    margin-top: 2px;
+}
+
+/* --- Etiqueta del tramo, sobre el trazo --- */
+.route-leg {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    transform: translate(-50%, -50%);
+    display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    justify-content: center;
+    padding: 7px 13px;
+    border-radius: var(--r-pill);
+    background: rgba(6, 16, 32, .8);
+    border: 1px solid rgba(94, 234, 212, .38);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-size: .74rem;
+    max-width: 70%;
+    pointer-events: none;
+}
+.route-leg .mi { color: #5EEAD4; }
+.route-leg b { font-weight: 700; color: #fff; }
+.route-leg .sep { color: rgba(255, 255, 255, .35); }
+.route-leg > span:not(.mi):not(.sep):not(.leg-vuelta) { color: rgba(255, 255, 255, .8); }
+.route-leg .leg-vuelta {
+    flex-basis: 100%;
+    font-size: .64rem; letter-spacing: .07em; text-transform: uppercase;
+    color: rgba(245, 197, 24, .9);
+}
+
+.route-map-nota {
+    display: none;
+    position: absolute; right: 10px; bottom: 8px;
+    font-size: .62rem; letter-spacing: .04em;
+    color: rgba(255, 255, 255, .38);
+}
+
+/* --- Secuencia numerada bajo el esquema --- */
+.route-steps {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: grid; gap: 10px;
+}
+.route-steps .route-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border);
+    border-left: 3px solid var(--c-border-strong);
+}
+.route-steps .route-step.is-inicio { border-left-color: var(--brand-gold-500); }
+.route-steps .route-step.is-destino { border-left-color: #12805C; }
+.route-steps .step-n {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--c-primary); color: var(--c-on-primary);
+    font-size: .74rem; font-weight: 750;
+    flex-shrink: 0;
+}
+.route-steps .s-title { font-weight: 650; font-size: .9rem; line-height: 1.35; }
+.route-steps .s-meta { font-size: .82rem; color: var(--c-text-muted); margin-top: 2px; }
+
+/* --------------------------------------------------------------------------
+   MAPA 3D DEL RECORRIDO (MapLibre GL + OpenStreetMap + relieve AWS)
+   Sustituye al esquema SVG cuando estacion y zona tienen coordenadas. La misma
+   libreria se reutiliza como selector de coordenadas dentro de los modales.
+   -------------------------------------------------------------------------- */
+.route-geomap {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    min-height: 320px;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08), var(--sh-2);
+    background: var(--c-surface-2);
+}
+@media (min-width: 640px) {
+    .route-geomap { aspect-ratio: 16 / 10; min-height: 380px; }
+}
+.geomap-aviso {
+    display: grid; place-items: center; height: 100%; padding: 24px;
+    text-align: center; font-size: .86rem; color: var(--c-text-muted);
+}
+
+/* --- Spinner de carga del mapa 3D --- */
+.geomap-loading {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    background: linear-gradient(180deg, #0B2545 0%, #38618F 42%, #8FB6D9 72%, #C9DCEE 100%);
+    color: rgba(255, 255, 255, .85); font-size: .88rem;
+    transition: opacity .5s ease, visibility .5s ease;
+}
+.geomap-loading.is-hidden {
+    opacity: 0; visibility: hidden; pointer-events: none;
+}
+.geomap-spinner {
+    width: 38px; height: 38px;
+    border: 3px solid rgba(255, 255, 255, .2);
+    border-top-color: #F5C518;
+    border-radius: 50%;
+    animation: geomap-spin .8s linear infinite;
+}
+@keyframes geomap-spin { to { transform: rotate(360deg); } }
+
+/* Cielo: con la camara inclinada, sobre el horizonte se ve el fondo del marco */
+.route-geomap {
+    background: linear-gradient(180deg, #0B2545 0%, #38618F 42%, #8FB6D9 72%, #C9DCEE 100%);
+}
+
+/* --- Alfileres: circulo con anillo + etiqueta legible sobre el mapa --- */
+.geomap-marca {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    cursor: default;
+}
+.geomap-punto {
+    position: relative;
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .9), 0 6px 16px rgba(0, 0, 0, .45);
+}
+.geomap-punto .mi { font-size: 19px; }
+.geomap-marca-estacion .geomap-punto { background: var(--brand-gold-500, #F5C518); color: #0A1F3D; }
+.geomap-marca-zona .geomap-punto { background: #12805C; }
+.geomap-marca-pulso.geomap-marca-zona .geomap-punto::after {
+    content: ''; position: absolute;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid rgba(94, 234, 212, .85);
+    animation: geomapLatido 2.4s ease-out infinite;
+}
+@keyframes geomapLatido {
+    0%   { transform: scale(1);   opacity: .85; }
+    70%  { transform: scale(2.1); opacity: 0; }
+    100% { transform: scale(2.1); opacity: 0; }
+}
+.geomap-etiqueta {
+    max-width: 190px; padding: 5px 10px;
+    border-radius: var(--r-sm);
+    background: rgba(6, 16, 32, .82);
+    border: 1px solid rgba(255, 255, 255, .16);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    text-align: center; line-height: 1.25;
+}
+.geomap-etiqueta b {
+    display: block; color: #fff; font-size: .78rem; font-weight: 700;
+}
+.geomap-etiqueta i {
+    display: block; font-style: normal; margin-top: 1px;
+    font-size: .64rem; letter-spacing: .07em; text-transform: uppercase;
+    color: rgba(255, 255, 255, .6);
+}
+
+/* --- Interruptor 3D / 2D --- */
+.geomap-vista { display: flex; overflow: hidden; }
+.geomap-vista button {
+    width: auto; min-width: 38px; height: 30px; padding: 0 11px;
+    border: none; background: #fff; color: #4b5563;
+    font: 700 .74rem/1 inherit; letter-spacing: .04em; cursor: pointer;
+}
+.geomap-vista button + button { border-left: 1px solid rgba(0, 0, 0, .12); }
+.geomap-vista button:hover { background: #f3f4f6; }
+.geomap-vista button.is-activo { background: var(--brand-navy-800, #0A1F3D); color: #fff; }
+.geomap-vista .geomap-vista-via { min-width: 34px; padding: 0 8px; display: grid; place-items: center; }
+.geomap-vista .geomap-vista-via .mi { font-size: 17px; }
+.geomap-vista .geomap-vista-via.is-activo { background: var(--brand-gold-500, #F5C518); color: #0A1F3D; }
+
+/* Controles y globos de MapLibre con la paleta de la plataforma */
+.maplibregl-popup-content {
+    background: var(--c-surface); color: var(--c-text);
+    border-radius: var(--r-sm); box-shadow: var(--sh-2);
+    font-size: .84rem; padding: 10px 13px;
+}
+.maplibregl-popup-tip { border-top-color: var(--c-surface); border-bottom-color: var(--c-surface); }
+.maplibregl-ctrl-group { border-radius: var(--r-sm); overflow: hidden; }
+.maplibregl-ctrl-attrib { font-size: .68rem; }
+
+.map-picker {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px var(--c-border);
+    margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   ARRASTRAR Y SOLTAR IMAGENES (zonas turisticas)
+   -------------------------------------------------------------------------- */
+.image-drop {
+    position: relative;
+    border: 1.5px dashed var(--c-border-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
+}
+.image-drop:hover, .image-drop.is-dragover {
+    border-color: var(--c-primary);
+    background: var(--c-primary-container);
+}
+.image-drop-empty:not([hidden]) { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.image-drop-empty .mi { font-size: 30px; color: var(--c-text-muted); }
+.image-drop-empty .link-btn {
+    border: none; background: none; padding: 0; font: inherit;
+    color: var(--c-primary); font-weight: 650; cursor: pointer; text-decoration: underline;
+}
+.image-drop-status { padding: 10px 0; }
+.image-drop-preview:not([hidden]) { position: relative; display: inline-block; max-width: 100%; }
+.image-drop-preview img {
+    max-width: 100%; max-height: 160px; border-radius: var(--r-sm);
+    display: block; object-fit: cover;
+}
+.image-drop-remove {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--c-danger); color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+}
 
 /* Bloque de alerta del panel */
 .alert-item {
@@ -2334,6 +2847,15 @@ button:focus-visible,
 @media (min-width: 640px) {
     .wrap { padding: 0 20px; }
 
+    .route-map { aspect-ratio: 16 / 9; }
+    .route-pin .pin-tag { display: block; }
+    .route-map-nota { display: block; }
+    .route-pin { width: 30%; }
+    .route-pin .pin-mark { width: 42px; height: 42px; }
+    .route-pin .pin-tag b { font-size: .84rem; }
+    .route-leg { font-size: .84rem; padding: 8px 15px; }
+    .route-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
     .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .form-grid.cols-2, .form-grid.cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .span-2 { grid-column: span 2; }
@@ -2399,6 +2921,9 @@ button:focus-visible,
 
 /* === 960px · portátil ================================================== */
 @media (min-width: 960px) {
+    .route-map { aspect-ratio: 21 / 9; }
+    .route-pin { width: 26%; }
+
     /* La barra lateral del panel vuelve a ser permanente */
     .sidebar {
         position: sticky; top: 0;
@@ -2422,6 +2947,7 @@ button:focus-visible,
     .hero .hero-stats .l { font-size: .72rem; margin-top: 5px; }
 
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-split { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
 
     .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .form-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }

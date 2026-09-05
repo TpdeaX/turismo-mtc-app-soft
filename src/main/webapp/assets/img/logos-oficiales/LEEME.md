@@ -37,4 +37,4 @@ dejes el archivo oficial aquí. Basta con recargar la página después de copiar
 
 El logotipo de la propia plataforma —el escudo que se ve en la barra superior y
 en la pestaña del navegador— **no** es de una entidad externa: vive en
-`assets/img/logo-mtc.svg` y se diseñó para este proyecto.
+`assets/img/logo-mtc.png` y se diseñó para este proyecto.

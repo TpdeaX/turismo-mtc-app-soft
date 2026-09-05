@@ -4,6 +4,8 @@ import com.zonasturisticas.plataforma.beans.SincronizacionLog;
 import com.zonasturisticas.plataforma.services.PanelService;
 import com.zonasturisticas.plataforma.services.integracion.IntegracionScheduler;
 import com.zonasturisticas.plataforma.services.integracion.ResultadoSincronizacion;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +17,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 /**
- * Panel de control administrativo y modulo de integracion de datos.
+ * Panel de control administrativo.
  *
- * CU-06 / CU-07: ademas de la ejecucion periodica automatica, el gestor puede
- * disparar manualmente la sincronizacion con PeruRail y SENAMHI.
+ * CU-06 / CU-07: ademas de la ejecucion periodica automatica en segundo plano,
+ * el gestor puede disparar manualmente la sincronizacion con PeruRail y SENAMHI
+ * desde los accesos rapidos del panel (no existe una pagina dedicada de
+ * "Integraciones").
  */
 @Controller
 @RequestMapping("/panel")
@@ -33,26 +37,19 @@ public class PanelController {
     }
 
     @GetMapping
-    public String panel(@RequestParam(value = "denegado", required = false) String denegado, Model model) {
+    public String panel(HttpSession session, Model model) {
         model.addAttribute("resumen", panelService.resumen());
-        if (denegado != null) {
+        if (session.getAttribute("toast_denegado") != null) {
+            session.removeAttribute("toast_denegado");
             model.addAttribute("toast", "No cuenta con permisos para acceder a ese módulo.");
             model.addAttribute("toastTipo", "error");
         }
         return "panel/dashboard";
     }
 
-    @GetMapping("/integraciones")
-    public String integraciones(Model model) {
-        model.addAttribute("bitacora", integracionScheduler.bitacora());
-        model.addAttribute("ultimaPeruRail", integracionScheduler.ultima(SincronizacionLog.FUENTE_PERURAIL));
-        model.addAttribute("ultimaSenamhi", integracionScheduler.ultima(SincronizacionLog.FUENTE_SENAMHI));
-        return "panel/integraciones";
-    }
-
     @PostMapping("/integraciones/sincronizar")
     public String sincronizar(@RequestParam(value = "fuente", required = false) String fuente,
-            RedirectAttributes flash) {
+            HttpServletRequest request, RedirectAttributes flash) {
 
         List<ResultadoSincronizacion> resultados;
         if (SincronizacionLog.FUENTE_PERURAIL.equals(fuente)) {
@@ -70,6 +67,13 @@ public class PanelController {
                 ? "Sincronización completada: " + registros + " registros actualizados."
                 : "Una de las fuentes no respondió. Se conservó la última información válida.");
         flash.addFlashAttribute("toastTipo", todoOk ? "success" : "warning");
-        return "redirect:/panel/integraciones";
+
+        // Vuelve a la pagina que disparo la sincronizacion (dashboard o estaciones);
+        // ya no existe una pagina dedicada de "Integraciones". Se compara el
+        // Referer contra rutas propias conocidas en lugar de reenviarlo tal cual,
+        // para no abrir una redireccion abierta a partir de un encabezado externo.
+        String referer = request.getHeader("Referer");
+        boolean vieneDeEstaciones = referer != null && referer.contains("/panel/estaciones");
+        return "redirect:/panel" + (vieneDeEstaciones ? "/estaciones" : "");
     }
 }

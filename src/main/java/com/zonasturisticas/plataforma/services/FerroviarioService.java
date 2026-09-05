@@ -40,10 +40,6 @@ public class FerroviarioService {
         return servicioRepository.listarPorEstacion(estacionCodigo);
     }
 
-    public List<String> listarCorredores() {
-        return servicioRepository.listarCorredores();
-    }
-
     public ServicioFerroviario obtenerServicio(Integer codigo) {
         return codigo == null ? null : servicioRepository.findById(codigo).orElse(null);
     }
@@ -149,15 +145,13 @@ public class FerroviarioService {
         horarioRepository.deleteById(codigo);
     }
 
-    /** Ajuste porcentual masivo de tarifas de un corredor (accion "Update Prices"). */
+    /** Ajuste porcentual masivo de tarifas de todos los horarios (accion "Update Prices"). */
     @Transactional
-    public int ajustarTarifas(String corredor, double porcentaje) {
+    public int ajustarTarifas(double porcentaje) {
         List<HorarioFerroviario> horarios = listarHorarios();
         int afectados = 0;
         for (HorarioFerroviario h : horarios) {
-            boolean aplica = corredor == null || corredor.isBlank()
-                    || (h.getServicio() != null && corredor.equals(h.getServicio().getCorredor()));
-            if (aplica && h.getTarifa() != null) {
+            if (h.getTarifa() != null) {
                 BigDecimal factor = BigDecimal.valueOf(1 + (porcentaje / 100d));
                 h.setTarifa(h.getTarifa().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP));
                 horarioRepository.save(h);

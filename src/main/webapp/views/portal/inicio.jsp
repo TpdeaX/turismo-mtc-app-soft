@@ -6,10 +6,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>MTC Perú · Asesor de rutas turísticas a pie</title>
+    <title>${parametros['plataforma.nombre']} · Asesor de rutas turísticas a pie</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
+
+<%-- Pantalla de carga del portal principal --%>
+<div id="splash-screen" class="splash-screen">
+
+    <%-- Patrón topográfico de fondo --%>
+    <svg class="splash-topo" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+            <linearGradient id="spl-g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#F5C518" stop-opacity=".07"/>
+                <stop offset="100%" stop-color="#5EEAD4" stop-opacity=".04"/>
+            </linearGradient>
+        </defs>
+        <g fill="none" stroke="url(#spl-g1)" stroke-width=".8">
+            <path d="M-20 520 C80 480,180 540,280 500 S480 420,580 460 S780 380,880 420"/>
+            <path d="M-20 440 C100 400,200 460,320 420 S500 340,620 380 S780 300,880 340"/>
+            <path d="M-20 360 C120 320,220 380,360 340 S520 260,660 300 S780 220,880 260"/>
+            <path d="M-20 280 C140 240,240 300,400 260 S540 180,700 220 S780 140,880 180"/>
+            <path d="M-20 200 C160 160,260 220,440 180 S560 100,740 140 S780 60,880 100"/>
+            <path d="M-20 120 C180 80,280 140,480 100 S580 20,780 60 S820 -20,880 20"/>
+        </g>
+    </svg>
+
+    <%-- Partículas brillantes flotantes --%>
+    <div class="splash-particles" aria-hidden="true">
+        <i class="sp" style="--x:10%;--y:20%;--d:6s;--s:3px"></i>
+        <i class="sp" style="--x:25%;--y:70%;--d:8s;--s:2px"></i>
+        <i class="sp" style="--x:40%;--y:15%;--d:7s;--s:4px"></i>
+        <i class="sp" style="--x:60%;--y:80%;--d:5s;--s:2px"></i>
+        <i class="sp" style="--x:75%;--y:30%;--d:9s;--s:3px"></i>
+        <i class="sp" style="--x:85%;--y:65%;--d:6s;--s:2px"></i>
+        <i class="sp" style="--x:15%;--y:85%;--d:10s;--s:3px"></i>
+        <i class="sp" style="--x:50%;--y:45%;--d:7s;--s:2px"></i>
+        <i class="sp" style="--x:90%;--y:10%;--d:8s;--s:4px"></i>
+        <i class="sp" style="--x:35%;--y:55%;--d:6s;--s:2px"></i>
+        <i class="sp" style="--x:70%;--y:90%;--d:9s;--s:3px"></i>
+        <i class="sp" style="--x:5%;--y:50%;--d:7s;--s:2px"></i>
+    </div>
+
+    <%-- Iconos temáticos flotando --%>
+    <div class="splash-icons" aria-hidden="true">
+        <span class="splash-float-icon" style="--x:8%;--y:18%;--d:12s;--dl:0s">
+            <span class="mi">terrain</span>
+        </span>
+        <span class="splash-float-icon" style="--x:88%;--y:22%;--d:14s;--dl:.5s">
+            <span class="mi">tram</span>
+        </span>
+        <span class="splash-float-icon" style="--x:12%;--y:75%;--d:11s;--dl:1s">
+            <span class="mi">wb_sunny</span>
+        </span>
+        <span class="splash-float-icon" style="--x:82%;--y:78%;--d:13s;--dl:1.5s">
+            <span class="mi">directions_walk</span>
+        </span>
+        <span class="splash-float-icon" style="--x:22%;--y:40%;--d:15s;--dl:2s">
+            <span class="mi">map</span>
+        </span>
+        <span class="splash-float-icon" style="--x:78%;--y:48%;--d:10s;--dl:2.5s">
+            <span class="mi">travel_explore</span>
+        </span>
+        <span class="splash-float-icon" style="--x:50%;--y:88%;--d:12s;--dl:3s">
+            <span class="mi">flag</span>
+        </span>
+        <span class="splash-float-icon" style="--x:35%;--y:12%;--d:13s;--dl:1.2s">
+            <span class="mi">photo_camera</span>
+        </span>
+        <span class="splash-float-icon" style="--x:65%;--y:14%;--d:11s;--dl:2.2s">
+            <span class="mi">cloud</span>
+        </span>
+        <span class="splash-float-icon" style="--x:92%;--y:50%;--d:14s;--dl:.8s">
+            <span class="mi">landscape</span>
+        </span>
+    </div>
+
+    <%-- Contenido central --%>
+    <div class="splash-content">
+
+        <%-- Anillos giratorios concéntricos --%>
+        <div class="splash-rings">
+            <div class="splash-ring splash-ring-1"></div>
+            <div class="splash-ring splash-ring-2"></div>
+            <div class="splash-ring splash-ring-3"></div>
+            <img src="${ctx}/assets/img/logo-mtc.png"
+                 alt="${parametros['plataforma.nombre']}"
+                 width="80" height="80" class="splash-logo">
+        </div>
+
+        <h2 class="splash-title">${parametros['plataforma.nombre']}</h2>
+        <span class="splash-sub">${parametros['plataforma.lema']}</span>
+
+        <%-- Barra de progreso animada --%>
+        <div class="splash-progress">
+            <div class="splash-progress-bar"></div>
+        </div>
+
+        <div class="splash-features">
+            <span><span class="mi mi-sm">thermostat</span> Clima</span>
+            <span class="splash-dot"></span>
+            <span><span class="mi mi-sm">train</span> Trenes</span>
+            <span class="splash-dot"></span>
+            <span><span class="mi mi-sm">hiking</span> Rutas</span>
+        </div>
+
+        <span class="splash-hint">Preparando tu experiencia turística…</span>
+    </div>
+
+    <%-- Línea decorativa inferior con gradiente --%>
+    <div class="splash-bottom-line"></div>
+</div>
 
 <jsp:include page="../shared/portal-nav.jsp" />
 
@@ -24,7 +131,7 @@
             <div class="anim-up">
                 <span class="hero-kicker">
                     <span class="mi mi-sm">verified</span>
-                    Ministerio de Transportes y Comunicaciones
+                    ${parametros['plataforma.entidad']}
                 </span>
 
                 <h1 class="display display-xl">
@@ -155,8 +262,8 @@
                             Puedes elegir varias. Si no seleccionas ninguna, te mostraremos todo lo disponible.
                         </p>
                     </div>
-                    <span class="chip chip-outline">
-                        <span class="mi mi-sm">tune</span> Opcional
+                    <span class="muted" style="font-size:.8rem;font-style:italic;opacity:.7">
+                        <span class="mi mi-sm" style="font-size:.85rem;vertical-align:middle">tune</span> Opcional
                     </span>
                 </div>
 
@@ -406,5 +513,24 @@
 
 <jsp:include page="../shared/portal-footer.jsp" />
 <jsp:include page="../shared/scripts.jsp" />
+
+<script>
+(function () {
+    var splash = document.getElementById('splash-screen');
+    if (!splash) return;
+    function ocultar() {
+        splash.classList.add('is-hidden');
+        setTimeout(function () { splash.remove(); }, 600);
+    }
+    // Esperar a que cargue todo (imágenes, fuentes, etc.)
+    if (document.readyState === 'complete') {
+        setTimeout(ocultar, 300);
+    } else {
+        window.addEventListener('load', function () { setTimeout(ocultar, 300); });
+    }
+    // Red de seguridad: si algo se traba, se oculta en 5 segundos
+    setTimeout(ocultar, 5000);
+})();
+</script>
 </body>
 </html>

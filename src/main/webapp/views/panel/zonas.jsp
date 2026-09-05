@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Gestión de Zonas Turísticas · MTC Perú</title>
+    <title>Gestión de Zonas Turísticas · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -37,6 +37,8 @@
                         data-set-ubicacion=""
                         data-set-imagen=""
                         data-set-costoReferencial="0"
+                        data-set-latitud=""
+                        data-set-longitud=""
                         data-set-categorias=""
                         data-set-estado="true">
                     <span class="mi mi-sm">add_location_alt</span> Nueva zona turística
@@ -72,9 +74,6 @@
                                data-filter-target="#tabla-zonas" data-filter-empty="#sin-resultados">
                     </div>
                 </div>
-                <span class="chip chip-outline">
-                    <span class="mi mi-sm">filter_alt</span> Filtro en vivo
-                </span>
             </div>
 
             <!-- Tabla -->
@@ -201,6 +200,8 @@
                                                         data-set-ubicacion="<c:out value='${z.ubicacion}'/>"
                                                         data-set-imagen="<c:out value='${z.imagen}'/>"
                                                         data-set-costoReferencial="${z.costoReferencial}"
+                                                        data-set-latitud="${z.latitud}"
+                                                        data-set-longitud="${z.longitud}"
                                                         data-set-estacionCodigo="${z.estacion.codigo}"
                                                         data-set-rutaCodigo="${z.ruta.codigo}"
                                                         data-set-categorias="${catIds}"
@@ -385,10 +386,52 @@
                     </div>
 
                     <div class="field span-full">
-                        <label for="z-imagen">URL de la fotografía</label>
-                        <input class="input" type="url" id="z-imagen" name="imagen" maxlength="400"
-                               placeholder="https://…">
+                        <label for="z-imagen">Fotografía de la zona</label>
+                        <div class="image-drop" data-image-upload
+                             data-upload-url="${ctx}/panel/zonas/imagen" data-image-url-input="z-imagen">
+                            <input type="file" accept="image/*" hidden>
+                            <div class="image-drop-preview" hidden>
+                                <img alt="Vista previa de la fotografía">
+                                <button type="button" class="btn-icon btn-icon-sm image-drop-remove"
+                                        data-image-remove aria-label="Quitar imagen">
+                                    <span class="mi mi-sm">close</span>
+                                </button>
+                            </div>
+                            <div class="image-drop-empty">
+                                <span class="mi">add_photo_alternate</span>
+                                <p><strong>Arrastra una imagen aquí</strong> o
+                                    <span class="link-btn">elige un archivo</span></p>
+                                <span class="soft" style="font-size:.78rem">JPG, PNG, WEBP o GIF · máx. 5 MB</span>
+                            </div>
+                            <div class="image-drop-status soft" hidden></div>
+                        </div>
+                        <%-- El enlace es solo para imágenes alojadas en otro sitio: cuando la
+                             foto ya está en la plataforma, su ruta interna no se muestra. --%>
+                        <div class="image-url mt-2" data-image-url-wrap>
+                            <input class="input" type="text" id="z-imagen" name="imagen" maxlength="400"
+                                   placeholder="…o pega el enlace de una imagen externa (https://…)">
+                            <span class="hint">Se usará tal cual y se previsualiza aquí arriba.</span>
+                        </div>
                         <span class="hint">Opcional. Si se deja vacía, la plataforma genera una portada.</span>
+                    </div>
+
+                    <div class="field span-full" data-map-picker>
+                        <label>Ubicación en el mapa</label>
+                        <div class="map-picker" data-map-target></div>
+                        <div class="form-grid cols-2 mt-2">
+                            <div class="field">
+                                <label for="z-lat">Latitud</label>
+                                <input class="input" type="number" id="z-lat" name="latitud" step="0.000001"
+                                       data-map-lat placeholder="-13.163333">
+                            </div>
+                            <div class="field">
+                                <label for="z-lng">Longitud</label>
+                                <input class="input" type="number" id="z-lng" name="longitud" step="0.000001"
+                                       data-map-lng placeholder="-72.545556">
+                            </div>
+                        </div>
+                        <span class="hint">Opcional. Haz clic en el mapa o arrastra el marcador para ubicar
+                            la zona con precisión.</span>
                     </div>
 
                     <div class="field span-full">

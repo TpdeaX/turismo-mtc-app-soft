@@ -9,4 +9,5 @@
 
 <div class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-<script src="${pageContext.request.contextPath}/assets/js/app.js?v=3.3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/app.js?v=4.7"></script>

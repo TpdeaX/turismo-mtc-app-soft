@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Horarios y Precios Ferroviarios · MTC Perú</title>
+    <title>Horarios y Precios Ferroviarios · ${parametros['plataforma.nombre']}</title>
     <jsp:include page="../shared/head.jsp" />
 </head>
 <body>
@@ -33,7 +33,7 @@
                     <button type="button" class="btn btn-outline" data-modal-open="modal-servicio"
                             data-modal-title="Registrar nuevo servicio"
                             data-modal-sub="Define el trayecto entre dos estaciones"
-                            data-set-codigo="" data-set-nombre="" data-set-corredor=""
+                            data-set-codigo="" data-set-nombre=""
                             data-set-estado="ACTIVO">
                         <span class="mi mi-sm">add_road</span> Nuevo servicio
                     </button>
@@ -47,25 +47,11 @@
                 </div>
             </div>
 
-            <!-- Corredores -->
-            <c:if test="${not empty corredores}">
-                <div class="mb-4 anim-up">
-                    <div class="segmented">
-                        <a href="${ctx}/panel/ferroviario"
-                           class="${empty corredorActivo ? 'active' : ''}">Todos los corredores</a>
-                        <c:forEach var="co" items="${corredores}">
-                            <a href="${ctx}/panel/ferroviario?corredor=${co}"
-                               class="${corredorActivo eq co ? 'active' : ''}">${co}</a>
-                        </c:forEach>
-                    </div>
-                </div>
-            </c:if>
-
             <div class="filterbar mb-4 anim-up d-1">
                 <div class="field grow">
                     <div class="input-icon">
                         <span class="mi mi-sm">search</span>
-                        <input class="input" type="search" placeholder="Buscar tren, estación o corredor…"
+                        <input class="input" type="search" placeholder="Buscar tren o estación…"
                                data-filter-target="#tabla-servicios" data-filter-empty="#sin-servicios">
                     </div>
                 </div>
@@ -102,7 +88,6 @@
                                         <th style="width:52px"></th>
                                         <th>Servicio</th>
                                         <th>Trayecto</th>
-                                        <th>Corredor</th>
                                         <th>Horarios</th>
                                         <th>Estado</th>
                                         <th class="text-right" style="width:120px">Acciones</th>
@@ -110,8 +95,6 @@
                                 </thead>
                                 <tbody>
                                 <c:forEach var="s" items="${servicios}">
-                                    <c:if test="${empty corredorActivo or corredorActivo eq s.corredor}">
-
                                     <tr class="main-row">
                                         <td>
                                             <button type="button" class="expander" data-expand
@@ -129,7 +112,6 @@
                                             </div>
                                         </td>
                                         <td class="muted">${s.trayecto}</td>
-                                        <td><span class="chip chip-outline">${s.corredor}</span></td>
                                         <td>
                                             <span class="chip chip-info">
                                                 ${s.horarios.size()} programado(s)
@@ -168,7 +150,6 @@
                                                         data-set-nombre="<c:out value='${s.nombre}'/>"
                                                         data-set-origencodigo="${s.origen.codigo}"
                                                         data-set-destinocodigo="${s.destino.codigo}"
-                                                        data-set-corredor="<c:out value='${s.corredor}'/>"
                                                         data-set-estado="${s.estado}">
                                                     <span class="mi mi-sm">edit</span>
                                                 </button>
@@ -293,7 +274,6 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    </c:if>
                                 </c:forEach>
                                 </tbody>
                             </table>
@@ -350,17 +330,6 @@
                                 <option value="${e.codigo}">${e.nombre}</option>
                             </c:forEach>
                         </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="s-corredor">Corredor</label>
-                        <input class="input" type="text" id="s-corredor" name="corredor" maxlength="50"
-                               list="lista-corredores" placeholder="Ej. Cusco - Machupicchu">
-                        <datalist id="lista-corredores">
-                            <c:forEach var="co" items="${corredores}">
-                                <option value="${co}"></option>
-                            </c:forEach>
-                        </datalist>
                     </div>
 
                     <div class="field">
@@ -478,16 +447,7 @@
 
             <div class="modal-body">
                 <div class="form-grid cols-2">
-                    <div class="field">
-                        <label for="t-corredor">Corredor</label>
-                        <select class="select" id="t-corredor" name="corredor">
-                            <option value="">Todos los corredores</option>
-                            <c:forEach var="co" items="${corredores}">
-                                <option value="${co}">${co}</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="field">
+                    <div class="field span-full">
                         <label for="t-porcentaje">Porcentaje de ajuste (%) <span class="req">*</span></label>
                         <input class="input" type="number" id="t-porcentaje" name="porcentaje"
                                step="0.5" min="-90" max="200" required placeholder="5" data-autofocus>
@@ -499,7 +459,7 @@
                     <span class="mi mi-sm">warning</span>
                     <div>
                         <div class="notice-title">Operación masiva</div>
-                        El ajuste se aplicará a todos los horarios del corredor seleccionado y quedará
+                        El ajuste se aplicará a todos los horarios registrados y quedará
                         reflejado de inmediato en el portal público.
                     </div>
                 </div>

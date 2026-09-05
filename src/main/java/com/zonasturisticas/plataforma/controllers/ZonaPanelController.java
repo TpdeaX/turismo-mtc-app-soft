@@ -7,16 +7,28 @@ import com.zonasturisticas.plataforma.services.CategoriaService;
 import com.zonasturisticas.plataforma.services.EstacionService;
 import com.zonasturisticas.plataforma.services.RutaService;
 import com.zonasturisticas.plataforma.services.ZonaTuristicaService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * RF08 / CU-04: modulo "Gestión de Zonas Turísticas" de Travel Group Peru.
@@ -31,6 +43,9 @@ public class ZonaPanelController {
     private final RutaService rutaService;
     private final EstacionService estacionService;
     private final CategoriaService categoriaService;
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     public ZonaPanelController(ZonaTuristicaService zonaService, RutaService rutaService,
             EstacionService estacionService, CategoriaService categoriaService) {
@@ -60,6 +75,8 @@ public class ZonaPanelController {
             @RequestParam(required = false) String ubicacion,
             @RequestParam(required = false) String imagen,
             @RequestParam(required = false) String costoReferencial,
+            @RequestParam(required = false) String latitud,
+            @RequestParam(required = false) String longitud,
             @RequestParam Integer rutaCodigo,
             @RequestParam(value = "categorias", required = false) List<Integer> categorias,
             @RequestParam(required = false) String estado,
@@ -83,6 +100,8 @@ public class ZonaPanelController {
             zona.setEstado(estado != null);
             zona.setCostoReferencial(costoReferencial == null || costoReferencial.isBlank()
                     ? BigDecimal.ZERO : new BigDecimal(costoReferencial));
+            zona.setLatitud(latitud == null || latitud.isBlank() ? null : Double.parseDouble(latitud));
+            zona.setLongitud(longitud == null || longitud.isBlank() ? null : Double.parseDouble(longitud));
 
             zonaService.guardar(zona, categorias);
 
@@ -91,13 +110,61 @@ public class ZonaPanelController {
                     : "Zona turística actualizada correctamente.");
             flash.addFlashAttribute("toastTipo", "success");
         } catch (NumberFormatException e) {
-            flash.addFlashAttribute("toast", "El costo referencial debe ser un número válido.");
+            flash.addFlashAttribute("toast", "El costo referencial y las coordenadas deben ser números válidos.");
             flash.addFlashAttribute("toastTipo", "error");
         } catch (RuntimeException e) {
             flash.addFlashAttribute("toast", e.getMessage());
             flash.addFlashAttribute("toastTipo", "error");
         }
         return "redirect:/panel/zonas";
+    }
+
+    /** RF08: subida de la fotografia de una zona (alternativa a pegar una URL). */
+    @PostMapping("/zonas/imagen")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> subirImagenZona(@RequestParam("archivo") MultipartFile archivo) {
+        if (archivo.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No se recibió ningún archivo."));
+        }
+        String tipo = archivo.getContentType();
+        if (tipo == null || !tipo.startsWith("image/")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El archivo debe ser una imagen."));
+        }
+        try {
+            Path carpeta = Path.of(uploadDir, "zonas");
+            Files.createDirectories(carpeta);
+            String nombreArchivo = UUID.randomUUID() + extensionDe(archivo.getOriginalFilename(), tipo);
+            archivo.transferTo(carpeta.resolve(nombreArchivo));
+            return ResponseEntity.ok(Map.of("url", "/uploads/zonas/" + nombreArchivo));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "No se pudo guardar la imagen."));
+        }
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> imagenDemasiadoGrande() {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("error", "La imagen supera el tamaño máximo permitido (5 MB)."));
+    }
+
+    private String extensionDe(String nombreOriginal, String tipoContenido) {
+        if (nombreOriginal != null) {
+            int punto = nombreOriginal.lastIndexOf('.');
+            if (punto >= 0) {
+                String ext = nombreOriginal.substring(punto).toLowerCase();
+                if (ext.matches("\\.(jpg|jpeg|png|gif|webp|avif)")) {
+                    return ext;
+                }
+            }
+        }
+        return switch (tipoContenido) {
+            case "image/png" -> ".png";
+            case "image/gif" -> ".gif";
+            case "image/webp" -> ".webp";
+            case "image/avif" -> ".avif";
+            default -> ".jpg";
+        };
     }
 
     /** CU-04 flujo alternativo: eliminacion previa confirmacion. */
